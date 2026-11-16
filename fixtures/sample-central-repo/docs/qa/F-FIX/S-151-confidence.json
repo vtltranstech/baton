@@ -1,0 +1,22 @@
+{
+  "story": "S-151",
+  "track": "full",
+  "computedAt": "2026-11-04T13:10:00Z",
+  "weightsVersion": 1,
+  "signals": {
+    "definition_of_ready": {"points": 10, "max": 10, "evidence": "Readiness 9/9"},
+    "design_review": {"points": 10, "max": 10, "evidence": "Approved in round 1"},
+    "change_size": {"points": 10, "max": 10, "evidence": "3 files, 422 lines within M"},
+    "sensors": {"points": 10, "max": 10, "evidence": "archunit, pmd, checkstyle green; 0 loops"},
+    "mutation": {"points": 10, "max": 10, "evidence": "0.86 on changed lines"},
+    "acceptance_coverage": {"points": 10, "max": 10, "evidence": "3 of 3 ACs have a passing test"},
+    "independent_review": {"points": 15, "max": 15, "evidence": "0 HIGH, 0 MEDIUM"},
+    "conformance_fidelity": {"points": 10, "max": 10, "evidence": "CONFORMS; 1 of 1 rules faithful"},
+    "blast_radius": {"points": 1, "max": 15, "evidence": "writes notices, a collection not yet profiled"}
+  },
+  "raw": 86,
+  "caps": [],
+  "score": 86,
+  "lane": "senior",
+  "missing": []
+}

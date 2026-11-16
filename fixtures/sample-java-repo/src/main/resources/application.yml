@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: sample-java-repo
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/sample
+fee:
+  events-topic: fee.events
+rates:
+  base-url: https://rates.example.test
+accrual:
+  outbound-file: /data/outbound/accruals.csv

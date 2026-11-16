@@ -1,0 +1,8 @@
+{
+  "sourceRepo": "invoice-service",
+  "changedSymbols": [
+    "InvoiceView.total"
+  ],
+  "impacted": [],
+  "unknownEdges": []
+}

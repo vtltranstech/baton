@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "confidence",
+  "type": "object",
+  "required": [
+    "story",
+    "track",
+    "computedAt",
+    "weightsVersion",
+    "signals",
+    "raw",
+    "caps",
+    "score",
+    "lane",
+    "missing"
+  ],
+  "properties": {
+    "story": {
+      "type": "string"
+    },
+    "track": {
+      "enum": [
+        "light",
+        "full",
+        "spike"
+      ]
+    },
+    "computedAt": {
+      "type": "string"
+    },
+    "weightsVersion": {
+      "type": "integer"
+    },
+    "signals": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "points",
+          "max",
+          "evidence"
+        ],
+        "properties": {
+          "points": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "raw": {
+      "type": "number"
+    },
+    "caps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "cap",
+          "evidence"
+        ]
+      }
+    },
+    "score": {
+      "type": "number"
+    },
+    "lane": {
+      "enum": [
+        "fast",
+        "senior",
+        "tech-lead"
+      ]
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

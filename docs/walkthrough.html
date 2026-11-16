@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BATON Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a signal-box control panel. Swimlanes (people / agents / baton tools / gates) per phase on the left,
+   a sticky detail panel on the right; phases stack top to bottom; one column on phones. */
+:root {
+  --bg: #eef1f4;
+  --panel: #ffffff;
+  --ink: #16212c;
+  --muted: #566573;
+  --line: #c9d1d9;
+  --rail: #8796a5;
+  --human: #b8740f;
+  --human-soft: #fbf0dd;
+  --agent: #1f6f8b;
+  --agent-soft: #e1f0f5;
+  --tool: #5b4a8a;
+  --tool-soft: #ece8f6;
+  --gate: #b3261e;
+  --gate-soft: #fbe5e3;
+  --ok: #2e7d4f;
+  --focus: #1f6f8b;
+  --font-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --step--1: 0.8125rem;
+  --step-0: 0.9375rem;
+  --step-1: 1.125rem;
+  --step-2: 1.5rem;
+  --step-3: 2.125rem;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171d; --panel: #18212a; --ink: #e6edf3; --muted: #9fb0bf; --line: #2c3946; --rail: #5f7283;
+    --human: #e6a23c; --human-soft: #33270f; --agent: #5fb8d6; --agent-soft: #11303b;
+    --tool: #a896e0; --tool-soft: #261f3d; --gate: #f2756a; --gate-soft: #3a1714; --ok: #5cc28a; --focus: #5fb8d6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171d; --panel: #18212a; --ink: #e6edf3; --muted: #9fb0bf; --line: #2c3946; --rail: #5f7283;
+  --human: #e6a23c; --human-soft: #33270f; --agent: #5fb8d6; --agent-soft: #11303b;
+  --tool: #a896e0; --tool-soft: #261f3d; --gate: #f2756a; --gate-soft: #3a1714; --ok: #5cc28a; --focus: #5fb8d6;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.55; margin: 0; padding: 0 16px; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-block: 28px 64px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+a { color: var(--agent); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* header */
+header.top { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) auto; align-items: end; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.eyebrow { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header.top h1 { font-size: var(--step-3); font-weight: 700; margin-top: 4px; }
+header.top p { margin: 8px 0 0; max-width: 68ch; color: var(--muted); }
+@media (max-width: 720px) { header.top { grid-template-columns: minmax(0, 1fr); } }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: var(--step--1); color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; display: inline-block; }
+.sw.human { border-color: var(--human); background: var(--human-soft); }
+.sw.agent { border-color: var(--agent); background: var(--agent-soft); }
+.sw.tool { border-color: var(--tool); background: var(--tool-soft); }
+.sw.gate { border-color: var(--gate); background: var(--gate-soft); transform: rotate(45deg) scale(.85); }
+
+/* tabs */
+nav.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 18px 0 20px; }
+nav.tabs button { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; color: var(--muted); }
+nav.tabs button[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+
+/* layout */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); gap: 24px; align-items: start; }
+.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; max-height: calc(100vh - 32px); overflow: auto; }
+@media (max-width: 900px) { .stage { grid-template-columns: minmax(0, 1fr); } .panel { position: static; max-height: none; } }
+
+/* presenter bar */
+.presenter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+.presenter button { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.presenter button.primary { background: var(--agent); border-color: var(--agent); color: var(--panel); }
+.presenter .count { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); font-variant-numeric: tabular-nums; }
+.presenter .hint { font-size: var(--step--1); color: var(--muted); margin-left: auto; }
+
+/* phases and lanes */
+.phase { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 14px 16px; margin-bottom: 26px; }
+.phase + .phase::before { content: ""; position: absolute; left: 50%; top: -26px; width: 2px; height: 26px; background: var(--rail); }
+.phase-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.phase-head h2 { font-size: var(--step-1); }
+.phase-head .n { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+.phase-head p { margin: 0; color: var(--muted); font-size: var(--step--1); }
+.lanes { position: relative; display: grid; gap: 8px 14px; padding-top: 22px; }
+.lane-label { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); align-self: center; border-right: 1px dashed var(--line); padding-right: 8px; min-height: 52px; display: flex; align-items: center; }
+.cell { min-height: 52px; display: flex; align-items: center; }
+svg.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+svg.wires path { fill: none; stroke: var(--rail); stroke-width: 1.6; }
+svg.wires path.loop { stroke: var(--gate); stroke-dasharray: 5 4; }
+svg.wires text { fill: var(--gate); font-family: var(--font-mono); font-size: 10px; }
+
+.node { position: relative; z-index: 1; width: 100%; text-align: left; border: 2px solid; border-radius: 8px; padding: 8px 10px; cursor: pointer; background: var(--panel); transition: transform .12s ease, box-shadow .12s ease; }
+.node .k { display: block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.04em; color: var(--muted); }
+.node .t { display: block; font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; line-height: 1.2; }
+.node.human { border-color: var(--human); background: var(--human-soft); }
+.node.agent { border-color: var(--agent); background: var(--agent-soft); }
+.node.tool { border-color: var(--tool); background: var(--tool-soft); }
+.node.gate { border-color: var(--gate); background: var(--gate-soft); }
+.node.gate .t::before { content: ""; display: inline-block; width: 9px; height: 9px; background: var(--gate); transform: rotate(45deg); margin-right: 7px; vertical-align: 1px; }
+.node:hover { transform: translateY(-1px); box-shadow: 0 2px 0 var(--line); }
+.node[aria-current="true"] { box-shadow: 0 0 0 3px var(--ink); }
+.node.dim { opacity: .45; }
+
+/* always-on rail */
+.always { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-top: 4px; }
+.always .node { min-height: 64px; }
+
+/* phone layout for the lanes */
+@media (max-width: 720px) {
+  .lanes { grid-template-columns: minmax(0, 1fr) !important; }
+  .lane-label, .cell.empty, svg.wires { display: none; }
+  .cell { min-height: 0; }
+  .cell:not(.empty) { order: var(--o); }
+  .phase + .phase::before { display: none; }
+}
+
+/* detail panel */
+.panel .kind { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+.panel h3 { font-size: var(--step-2); margin: 6px 0 4px; }
+.panel .cmd { display: inline-block; margin: 6px 0 2px; padding: 3px 8px; border-radius: 5px; background: var(--bg); border: 1px solid var(--line); font-family: var(--font-mono); font-size: var(--step--1); }
+.panel .lead { margin: 10px 0 0; }
+.panel h4 { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 6px; font-weight: 500; }
+.panel ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.panel li { padding-left: 2px; }
+.panel .why { margin-top: 18px; padding: 10px 12px; border-left: 3px solid var(--human); background: var(--human-soft); border-radius: 0 6px 6px 0; }
+.panel .why b { font-family: var(--font-display); }
+.panel .io { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 420px) { .panel .io { grid-template-columns: minmax(0, 1fr); } }
+.panel .nav { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--line); }
+.panel .nav button { border: 1px solid var(--line); background: transparent; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: var(--step--1); }
+.panel .nav button:disabled { opacity: .4; cursor: default; }
+
+/* generic card grids for the other tabs */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.cards .node { min-height: 78px; }
+.section-note { color: var(--muted); margin: 0 0 14px; max-width: 70ch; }
+.group-title { font-family: var(--font-display); font-size: var(--step-1); margin: 22px 0 10px; }
+.group-title:first-child { margin-top: 0; }
+
+/* install steps */
+.steps { display: grid; gap: 10px; counter-reset: s; }
+.steps .node { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: center; }
+.steps .num { font-family: var(--font-mono); font-size: var(--step-1); color: var(--muted); text-align: center; }
+
+/* new or existing project */
+.paths { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 720px) { .paths { grid-template-columns: minmax(0, 1fr); } }
+.path-head { margin: 0 0 10px; }
+.path-head h2 { font-size: var(--step-1); margin: 0; }
+.path-head p { margin: 2px 0 0; color: var(--muted); font-size: var(--step--1); }
+.compare { margin-top: 26px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.compare h3 { font-size: var(--step-1); margin: 0; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.compare .row { display: grid; grid-template-columns: minmax(110px, 0.7fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 9px 14px; border-top: 1px solid var(--line); font-size: var(--step--1); }
+.compare .row:first-of-type { border-top: 0; }
+.compare .row.head { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+.compare .row b { font-family: var(--font-display); font-weight: 600; }
+@media (max-width: 560px) {
+  .compare .row { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .compare .row.head { display: none; }
+  .compare .row span:nth-child(2)::before { content: "New: "; color: var(--muted); }
+  .compare .row span:nth-child(3)::before { content: "Existing: "; color: var(--muted); }
+}
+
+/* IR tab */
+.ir-block { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 0; overflow-x: auto; }
+.ir-line { display: block; width: 100%; text-align: left; background: transparent; border: 0; border-left: 3px solid transparent; padding: 3px 16px; font-family: var(--font-mono); font-size: 0.82rem; white-space: pre; cursor: pointer; color: var(--ink); }
+.ir-line:hover { background: var(--bg); }
+.ir-line[aria-current="true"] { border-left-color: var(--agent); background: var(--agent-soft); }
+.ir-line .kw { color: var(--agent); font-weight: 500; }
+.chart { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 18px; }
+.chart h3 { font-size: var(--step-1); margin-bottom: 4px; }
+.chart p { margin: 0 0 12px; color: var(--muted); font-size: var(--step--1); }
+.bar-row { display: grid; grid-template-columns: minmax(120px, 210px) minmax(0, 1fr); gap: 10px; align-items: center; margin: 8px 0; font-size: var(--step--1); }
+.bar { position: relative; height: 22px; background: var(--bg); border-radius: 4px; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+.bar b { position: absolute; left: calc(var(--w) + 6px); top: 1px; font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar.big b { left: auto; right: 6px; color: var(--panel); }
+.foot { margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: var(--step--1); }
+@media (prefers-reduced-motion: reduce) { .node { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">BATON agentic delivery &middot; Java / Spring / React / Mongo</div>
+      <h1>How a story becomes a merged PR</h1>
+      <p>Seven Claude Code agents build one story at a time. Deterministic tools read the code, hooks enforce the rules, and people decide at three gates. Click any box for the detail, or press Play to walk the flow. <code>/deliver F-003</code> runs the whole flow for a feature and stops only at the gates.</p>
+    </div>
+    <div class="legend" aria-label="Legend">
+      <span><i class="sw human"></i>People</span>
+      <span><i class="sw agent"></i>Agent</span>
+      <span><i class="sw tool"></i>baton tool (no AI)</span>
+      <span><i class="sw gate"></i>Gate</span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="tab-flow" aria-controls="view-flow" aria-selected="true" data-view="flow">Story flow</button>
+    <button role="tab" id="tab-install" aria-controls="view-install" aria-selected="false" data-view="install">Installation</button>
+    <button role="tab" id="tab-paths" aria-controls="view-paths" aria-selected="false" data-view="paths">New or existing project</button>
+    <button role="tab" id="tab-ir" aria-controls="view-ir" aria-selected="false" data-view="ir">How agents read code</button>
+    <button role="tab" id="tab-safety" aria-controls="view-safety" aria-selected="false" data-view="safety">Safety hooks</button>
+    <button role="tab" id="tab-team" aria-controls="view-team" aria-selected="false" data-view="team">Agents and skills</button>
+    <button role="tab" id="tab-commands" aria-controls="view-commands" aria-selected="false" data-view="commands">Commands</button>
+  </nav>
+
+  <div class="stage">
+    <main id="main">
+      <section id="view-flow" role="tabpanel" aria-labelledby="tab-flow">
+        <div class="presenter">
+          <button type="button" id="prev">&larr; Back</button>
+          <button type="button" id="play" class="primary">Play</button>
+          <button type="button" id="next">Next &rarr;</button>
+          <span class="count" id="count">Step 1 of 18</span>
+          <span class="hint">Arrow keys step through</span>
+        </div>
+        <div id="phases"></div>
+        <div class="phase">
+          <div class="phase-head"><span class="n">Always on</span><h2>Underneath every step</h2></div>
+          <div class="always" id="always"></div>
+        </div>
+      </section>
+      <section id="view-install" role="tabpanel" aria-labelledby="tab-install" hidden>
+        <p class="section-note">Two setups, each done once: every person's machine, and every central repo. Upgrades repeat the same commands. Click a step for the exact commands and what each writes.</p>
+        <div class="steps" id="install-steps"></div>
+      </section>
+      <section id="view-paths" role="tabpanel" aria-labelledby="tab-paths" hidden>
+        <p class="section-note">The same baton serves a product with no code yet and one with years of code. The start differs; after the first few merged stories the two paths are the same flow. Click a step for what to do and what it writes.</p>
+        <div class="paths">
+          <div>
+            <div class="path-head"><h2>Completely new project</h2><p>No services written yet. The knowledge starts with people, not code.</p></div>
+            <div class="steps" id="new-steps"></div>
+          </div>
+          <div>
+            <div class="path-head"><h2>Existing project</h2><p>Services already running. The knowledge starts with the code.</p></div>
+            <div class="steps" id="existing-steps"></div>
+          </div>
+        </div>
+        <div class="compare" id="compare"></div>
+      </section>
+      <section id="view-ir" role="tabpanel" aria-labelledby="tab-ir" hidden>
+        <p class="section-note">The IR (intermediate representation) is the code lifted from its syntax tree into operations and their effects. An agent reads these few lines instead of whole files. Click a line to see what it means.</p>
+        <div class="ir-block" id="ir-block"></div>
+        <div class="chart">
+          <h3>Tokens an agent reads before it starts</h3>
+          <p>Measured on a 12-service product (about 1,180 Java files). One token is roughly four characters.</p>
+          <div id="bars"></div>
+        </div>
+      </section>
+      <section id="view-safety" role="tabpanel" aria-labelledby="tab-safety" hidden>
+        <p class="section-note">Hooks run before or after every tool call an agent makes. A gate hook that refuses, or cannot even start, blocks the call. Nothing here depends on the model behaving.</p>
+        <div class="cards" id="hook-cards"></div>
+      </section>
+      <section id="view-team" role="tabpanel" aria-labelledby="tab-team" hidden>
+        <div id="team"></div>
+      </section>
+      <section id="view-commands" role="tabpanel" aria-labelledby="tab-commands" hidden>
+        <div id="commands"></div>
+      </section>
+    </main>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <p class="foot">baton framework &middot; full text guide: <code>docs/guide.md</code> &middot; contracts: <code>contracts/</code> &middot; this page: <code>docs/walkthrough.html</code></p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var LANES = ["human", "agent", "tool", "gate"];
+  var LANE_NAME = { human: "People", agent: "Agent", tool: "baton tool", gate: "Gate" };
+
+  /* ---------------- story flow ---------------- */
+  var PHASES = [
+    { n: "Phase 1", title: "Plan", note: "From an idea to a story the team agrees to build", cols: 4 },
+    { n: "Phase 2", title: "Design", note: "A design checked against the real code, reviewed by a person", cols: 4 },
+    { n: "Phase 3", title: "Build and verify", note: "Code, tests and independent checks, with fix loops", cols: 5 },
+    { n: "Phase 4", title: "Approve and ship", note: "People approve; the PR carries every piece of evidence", cols: 5 }
+  ];
+  var FLOW = [
+    { id: "feature", phase: 0, lane: "human", col: 0, kind: "Product Owner", title: "Feature note",
+      cmd: "docs/features/F-003-<slug>.md",
+      lead: "The Product Owner writes what the business needs, in plain language, in the central repo.",
+      steps: ["Problem: what is wrong or missing today, and its cost", "Outcome: what is true when it is done", "Who uses it, the business rules, feature-level acceptance", "Volumes, scope in and out, dependencies", "Open questions the team must answer"],
+      inputs: ["Business need", "profile/domain.md (rules and glossary)"], outputs: ["docs/features/F-003-<slug>.md"],
+      why: "The single source of intent. Every later artefact traces back to it, so nobody builds from a chat message." },
+    { id: "stories", phase: 0, lane: "agent", col: 1, kind: "story-drafter agent", title: "Draft stories",
+      cmd: "/stories F-003",
+      lead: "The story-drafter checks the feature has enough information, asks for what is missing, then splits it into stories.",
+      steps: ["Feature check: lists the gaps as questions a person can answer in one line", "Splits into stories that can ship independently", "Writes acceptance criteria, estimate, risks, Jira type and labels for each", "Respects stories people already wrote", "Ends by running /ready on every draft"],
+      inputs: ["Feature note", "profile/domain.md", "story-writing and triage skills"], outputs: ["docs/stories/F-003/S-301.md ...", "State: Draft"],
+      rules: ["Never sets Ready", "Never changes a human-written story's acceptance criteria"],
+      why: "Consistent, testable stories in minutes; humans spend their time answering questions, not formatting." },
+    { id: "ready", phase: 0, lane: "agent", col: 2, kind: "story-drafter agent + people", title: "Definition of Ready",
+      cmd: "/ready S-301",
+      lead: "Every story, drafted or human-written, is checked against the Definition of Ready, with a question loop until nothing is missing.",
+      steps: ["Lists exactly what is missing (data, rules, edge cases, ACs that cannot be tested)", "Asks the person, records each answer in the story", "Moves the story to Ready for PO when the gaps are closed"],
+      inputs: ["The story", "profile/domain.md"], outputs: ["Answers recorded in the story", "State: Needs Clarification or Ready for PO"],
+      why: "Ambiguity is cheapest to fix here. A story that reaches design with a hole costs a design round; one that reaches code costs a sprint." },
+    { id: "gate1", phase: 0, lane: "gate", col: 3, kind: "Gate 1 - Product Owner", title: "Ready",
+      cmd: "PO answers: Set Ready",
+      lead: "Only the Product Owner can make a story buildable.",
+      steps: ["The PO reads the story and its answers", "Chooses Set Ready (or sends it back)", "/build refuses any story that is not Ready"],
+      outputs: ["State: Ready"], rules: ["Only a person sets Ready; the state-gate hook refuses an agent that tries"],
+      why: "Business ownership of scope stays with the business." },
+
+    { id: "deps", phase: 1, lane: "tool", col: 0, kind: "baton deps", title: "Dependencies check",
+      cmd: "baton deps S-301",
+      lead: "Before any agent runs, the tool checks that every story this one depends on is finished and its PR merged.",
+      steps: ["Reads Depends-On: in every story", "Exit 2 with the blocking stories and their state", "Prints the PR of each dependency so /build can confirm it is merged"],
+      inputs: ["docs/stories/**"], outputs: ["Go or stop, with the reason"],
+      rules: ["Only a person can change Depends-On:"],
+      why: "Prevents building on top of unmerged work, the most common cause of rework between stories." },
+    { id: "architect", phase: 1, lane: "agent", col: 1, kind: "architect agent", title: "Design",
+      cmd: "inside /build S-301",
+      lead: "The architect writes the design note and a short change spec: what is new, changed or removed, and where a new call goes.",
+      steps: ["Verifies the stack against the build files (versions, Mongo, Kafka, Batch)", "Reads the code through the IR: where the story lands, what each operation reads and writes", "Light track: 5-section note. Full track: 11 sections with diagrams, risks, pattern ledger", "Escalates light to full on a new collection, field, index, endpoint, or a second repo", "Runs the design-review lenses before any person sees it, and scores its confidence"],
+      inputs: ["Story", "profile/domain.md, stack-detected.md", "baton ir show / find", "Architecture views generated from code"],
+      outputs: ["docs/design/F-003/S-301-design.md", "S-301-change.yaml", "Confidence NN%"],
+      rules: ["Never draws diagrams by hand", "Never designs against a version it has not just confirmed", "Every pattern justified by a force from this story"],
+      why: "Designs are grounded in the code as it is, not as someone remembers it." },
+    { id: "diagrams", phase: 1, lane: "tool", col: 2, kind: "baton diagram, impact, ir slice", title: "Diagrams and blast radius",
+      cmd: "baton diagram story S-301",
+      lead: "From the change spec, the tool draws every diagram from the code's syntax tree and checks the spec against the code.",
+      steps: ["Flow with impacts, a sequence per entry point, low-level design, data model, use cases", "Refuses a spec that names a class, method or collection the code does not have", "Blast radius across repos: every impacted file:line and unknown edge", "Writes the story's context pack for the developer and QA"],
+      inputs: ["S-301-change.yaml", "Code map (AST)", "profile/dependencies.yaml"],
+      outputs: ["docs/design/F-003/S-301-diagrams/ (SVG, Markdown, HTML)", "Blast radius table", ".baton/context/S-301.md"],
+      why: "Diagrams that cannot drift from the code, and an impact list nobody can leave out by judgement." },
+    { id: "gate2", phase: 1, lane: "gate", col: 3, kind: "Gate 2 - Senior Engineer reads, Tech Lead decides", title: "Design review",
+      cmd: "Approve / Request changes / Block",
+      lead: "A person reviews the design before code is written. The question shows the confidence and what to check.",
+      steps: ["Light track at confidence 80 or more, and hotfixes: auto-pass, recorded", "Full track, spike, or labels new-api, data-model, batch-job: always asked", "Request changes: the architect revises (up to 2 rounds), optionally with a critique method", "Block: nothing is built"],
+      outputs: ["## Design review in the story", "State: Design Approved", "A calibration row in docs/metrics.md"],
+      loop: "Request changes sends the story back to the architect.",
+      why: "The cheapest place to stop a wrong approach. The calibration rows show over time whether the confidence score can be trusted." },
+
+    { id: "developer", phase: 2, lane: "agent", col: 0, kind: "developer agent", title: "Build",
+      cmd: "inside /build",
+      lead: "The developer implements the design task by task on a feature branch in each repo, with unit tests.",
+      steps: ["Starts from the context pack: the exact files and line ranges, with reasons", "Branch feature/F-003-S-301 in each repo; never main", "Implements the pattern the design names; any departure is written under Deviations first", "Every acceptance criterion gets a test named after it", "Commits per task: S-301: <task>"],
+      inputs: ["Design note", ".baton/context/S-301.md", "standards skill (stack rules, patterns)"],
+      outputs: ["Code and tests on the branch", "## Dev summary and ## Rule ledger in the story"],
+      rules: ["Changes only files the design lists", "Never runs against a non-test database", "A sensor failure is fixed, never suppressed"],
+      why: "Reviewable, traceable changes: every task maps to a design line and every AC to a test." },
+    { id: "sensors", phase: 2, lane: "tool", col: 1, kind: "Sensors + diff shape", title: "Mechanical checks",
+      cmd: "mvn -q verify (PMD, Checkstyle, ArchUnit, ESLint)",
+      lead: "Static checks and architecture rules run on every build; the diff is measured against the estimate.",
+      steps: ["ArchUnit is mandatory: no green archunit.txt, no In Review", "PMD, Checkstyle, ESLint reports saved per story", "Diff shape: lines against estimate, new public types, single-implementation abstractions, new dependencies, queries without the partition key"],
+      outputs: ["docs/qa/F-003/S-301-sensors/", "S-301-diff-shape.json"],
+      rules: ["The state-gate hook refuses In Review without a green ArchUnit report"],
+      why: "Quality rules that hold even when nobody is watching; flags go straight to QA." },
+    { id: "qa", phase: 2, lane: "agent", col: 2, kind: "qa agent", title: "QA",
+      cmd: "inside /build",
+      lead: "QA writes the expected result per acceptance criterion from the story first, then reads the design and the diff.",
+      steps: ["Independence rule: expectations before reading the developer's work", "Fresh-context review lenses by risk tier: low runs conformance and verification gaps (and domain fidelity when a rule is named); medium and high add edge cases and craft", "Runs each AC's test; no test means FAIL", "Data checks against the named test environment: counts, orphans, duplicates", "Mutation testing on the changed code"],
+      inputs: ["Story ACs", "Design", "Diff", "Context pack", "data-check skill"],
+      outputs: ["docs/qa/F-003/S-301-test-report.md", "Verdict: PASS or FAIL"],
+      loop: "QA Fail sends the story back to the developer with the defects listed.",
+      why: "An independent check that is sceptical by design, with evidence a reviewer can rerun." },
+    { id: "security", phase: 2, lane: "agent", col: 3, kind: "security agent", title: "Security review",
+      cmd: "inside /build",
+      lead: "Reviews the branch for secrets, data exposure, injection, entitlement gaps, risky dependencies and environment boundaries.",
+      steps: ["Checklist and severity rubric for Java, Spring and React in a regulated bank", "Project specifics from profile/domain.md", "High findings block the story"],
+      outputs: ["docs/qa/F-003/S-301-security-report.md"],
+      why: "Security is part of every story, not a quarterly audit." },
+    { id: "confidence", phase: 2, lane: "tool", col: 4, kind: "baton confidence, evidence", title: "Confidence score",
+      cmd: "baton confidence S-301",
+      lead: "Every artefact is scored with fixed weights that agents cannot read; the score picks the approval lane.",
+      steps: ["Inputs: QA verdict, lens findings, sensors and loops, mutation score, diff size, blast radius, risk zones", "Caps: any risk-zone write, breaking contract or missing artefact forces the tech-lead lane", "Lanes: fast (light track, high score), senior, tech-lead", "evidence.md links every artefact for the reviewer"],
+      outputs: ["S-301-confidence.json", "S-301-evidence.md"],
+      rules: ["profile/confidence-weights.yaml is unreadable to agents (protect_weights hook)"],
+      why: "Reviewer time goes where the risk is; the score cannot be gamed by the agents being scored." },
+
+    { id: "review", phase: 3, lane: "human", col: 0, kind: "Team", title: "Sprint review",
+      cmd: "/sprint-review",
+      lead: "One pack of every story waiting for approval, ordered by lane, with evidence, reports and open risks.",
+      outputs: ["The gate-3 pack"],
+      why: "A short, evidence-led review instead of reading branches." },
+    { id: "gate3", phase: 3, lane: "gate", col: 1, kind: "Gate 3 - per lane", title: "Approved",
+      cmd: "a person sets State: Approved",
+      lead: "A person approves each story. The lane says who: a senior engineer, or the tech lead for capped stories.",
+      outputs: ["State: Approved", "## Human findings in the story"],
+      rules: ["The state-gate hook needs QA Pass, a security report, confidence.json and human findings"],
+      why: "Accountability stays with people; the agents only prepare the evidence." },
+    { id: "documentation", phase: 3, lane: "agent", col: 2, kind: "documentation agent", title: "Document",
+      cmd: "/ship S-301",
+      lead: "Writes the change note and regenerates the knowledge the next stories read.",
+      steps: ["Change note in the doc-style format", "ADR when a person settled an open decision", "Regenerates the wiki pages and the codebase map for the modules touched, then verifies them", "Regenerates the architecture views from the merged code"],
+      outputs: ["docs/changes/F-003/S-301-change-note.md", "docs/wiki/**", "State: Documented"],
+      rules: ["Never hand-edits a generated page; only baton verify marks a page verified"],
+      why: "Documentation that stays current because a tool regenerates it on every story." },
+    { id: "release", phase: 3, lane: "agent", col: 3, kind: "release agent", title: "Open the PR",
+      cmd: "/ship S-301",
+      lead: "Opens one PR per repo, linking the story, design, diagrams, reports, evidence and change note, and records metrics.",
+      outputs: ["PR(s)", "docs/metrics.md row"],
+      rules: ["Never merges"],
+      why: "The PR is a complete audit trail: a reviewer or auditor sees why, what and how it was verified in one place." },
+    { id: "merge", phase: 3, lane: "human", col: 4, kind: "Engineer", title: "Merge",
+      cmd: "a person merges",
+      lead: "A person reviews and merges every PR. The hooks make it impossible for an agent to merge or push to main.",
+      outputs: ["State: Done"],
+      why: "The final control point stays human." }
+  ];
+  var LOOPS = [{ from: "gate2", to: "architect", label: "changes" }, { from: "qa", to: "developer", label: "QA fail" }];
+  var ALWAYS = [
+    { id: "hooks", lane: "tool", kind: "Hooks", title: "Rules enforced on every tool call",
+      lead: "Six hooks run around every Read, Grep, Bash, Write and Edit an agent makes.",
+      steps: ["No commits or pushes to main, no merges, no force pushes", "Only the named test database is reachable", "A story state needs its evidence", "Confidence weights are unreadable", "Docs follow the house style", "Every read is logged for cost analysis"],
+      why: "Controls that hold even if an agent misbehaves. See the Safety hooks tab." },
+    { id: "irnode", lane: "tool", kind: "baton ir", title: "Code read through the IR",
+      lead: "Agents read the code as operations and effects instead of whole files.",
+      steps: ["One line per service to orient", "baton ir find <words> to see where a story lands", "Each operation: calls, data read and written, events, callers, entry points"],
+      why: "About 60 times fewer tokens to orient than the old map. See the How agents read code tab." },
+    { id: "onboard", lane: "human", kind: "Once per product", title: "/onboard",
+      lead: "Before the first story: extracts the stack and every dependency edge from the code and interviews people for what code cannot show.",
+      outputs: ["profile/stack-detected.md", "profile/dependencies.yaml", "docs/architecture/", "docs/context/codebase-map.md"],
+      why: "Agents start from facts with file:line provenance, not from guesses." },
+    { id: "measure", lane: "tool", kind: "baton reads, metrics", title: "Measured, not assumed",
+      lead: "Every read is logged; every gate decision lands in docs/metrics.md.",
+      steps: ["baton reads --story S-301: reads, re-reads, searches and tokens per agent", "Calibration: confidence against the human review outcome", "/retro turns the numbers into prompt, skill or threshold changes"],
+      why: "Cost and quality trends are visible per story and per sprint." }
+  ];
+
+  /* ---------------- other tabs ---------------- */
+  var INSTALL = [
+    { id: "i1", lane: "human", kind: "Each person, once", title: "Machine tools",
+      lead: "Install the tools the hooks and the baton command need.",
+      steps: ["Claude Code 2.1.295 or later (the gate hooks need onFailure: block)", "Python 3.11 or later (Windows: the py -3 launcher works)", "Git (Windows: Git for Windows, which provides Git Bash; hooks run under it)", "A JDK and Maven or Gradle: reading Java and building the service repos", "Node and npm: reading React and TypeScript, npm run lint", "pipx, then pipx ensurepath and a new terminal", "gh (or your Git host CLI) logged in: the release agent opens PRs", "Read access to the framework repo; write access to the central and service repos", "Service repos cloned next to the central repo (agents use ../<repo>)"],
+      why: "Without Python or Git Bash the gate hooks refuse every call, by design." },
+    { id: "i2", lane: "tool", kind: "Each person, once", title: "Clone and install the CLI",
+      cmd: "pipx install ~/tools/baton/tools/baton",
+      lead: "Clone the framework once and install the baton command the agents call.",
+      steps: ["git clone https://github.com/vtltranstech/harness.git ~/tools/baton", "pipx install ~/tools/baton/tools/baton", "baton --help lists ir, reads, install, extract, diagram"],
+      outputs: ["baton on the PATH"] },
+    { id: "i3", lane: "tool", kind: "Each central repo, once", title: "Install into the central repo",
+      cmd: "python3 ~/tools/baton/tools/baton/cli.py install --no-mcp",
+      lead: "Run from the central repo folder (the one that holds .claude). --check first shows what it would write.",
+      steps: ["Copies agents, skills, hooks, sensors, templates and tools into .claude/", "Records every file's hash in .claude/baton-install.json", "Adds the baton hooks to .claude/settings.json and keeps your other settings", "Creates CLAUDE.md and profile/* only when missing", "Adds .baton/ to .gitignore and LF rules to .gitattributes", "--no-mcp when the organisation allows only listed MCP servers"],
+      outputs: [".claude/", "CLAUDE.md, profile/", ".gitignore, .gitattributes"],
+      rules: ["Never overwrites a project file", "An installed file you edited is a conflict: kept, reported, exit 1 (--force replaces)"] },
+    { id: "i4", lane: "human", kind: "Each central repo, once", title: "Commit, allow, verify",
+      lead: "Commit .claude/, CLAUDE.md, profile/, .gitignore and .gitattributes. Teammates who clone the central repo only need the machine setup.",
+      steps: ["Allow the baton command once: add \"permissions\": { \"allow\": [\"Bash(baton:*)\"] } to .claude/settings.json (install never changes permissions)", "Check: baton --help lists ir, reads, install", "Check: .claude/baton-install.json shows the framework version", "Check: ask Claude Code to run git push origin main; protect_main refuses it", "After /onboard: baton ir show prints one line per service"],
+      why: "One person installs; everyone else pulls." },
+    { id: "i5", lane: "agent", kind: "Each central repo, once", title: "Profile and /onboard",
+      cmd: "/onboard",
+      lead: "Fill profile/project.md (repos, team, test database variable) and profile/domain.md (rules, glossary), then run /onboard in Claude Code.",
+      outputs: ["stack-detected.md", "dependencies.yaml", "architecture views", "codebase map"] },
+    { id: "i6", lane: "tool", kind: "Other projects", title: "Install from a central repo",
+      cmd: "python3 .claude/tools/baton/cli.py install --central ../other-central",
+      lead: "An installed central repo can install the next project. No framework clone needed.",
+      steps: ["From pipx: baton install --from ~/work/my-central --central ../other-central", "A .claude/ copied by hand before install existed needs one install from the clone first (it has no templates/)"] },
+    { id: "i7", lane: "tool", kind: "When the framework changes", title: "Upgrade",
+      cmd: "git pull; pipx install --force ...; install --check; install",
+      lead: "Pull the framework, reinstall the CLI, preview and run the install, commit .claude/, restart Claude Code.",
+      steps: ["Replaces only what install put there; removes files the framework dropped", "Keeps your own agents and skills", "Caches rebuild on the first baton ir run", "No /onboard needed for an upgrade"] },
+    { id: "i8", lane: "gate", kind: "Windows", title: "Windows notes",
+      lead: "Hooks run as bash \"<project>/.claude/hooks/run-hook\" <hook>.py, which needs Git Bash.",
+      steps: ["Without Git Bash Claude Code falls back to PowerShell and every gate refuses", "A clone made before .gitattributes existed: git add --renormalize . && git checkout -- . once", "Python is found as python3, python, py -3, or BATON_PYTHON"] }
+  ];
+  var NEW_PATH = [
+    { id: "n1", lane: "human", kind: "Before the baton", title: "Create the repos from a starter",
+      lead: "Create the central repo and every service repo from your organisation's starter (or Spring Initializr and the UI template), and commit once.",
+      steps: ["Each service repo has its build file: pom.xml, build.gradle(.kts) or package.json, with the Java and Spring Boot versions pinned", "An application class under the package root (for example com.example.acct.AcctApplication), so the package root is detected", "Datastore and messaging starters in the build file if you already know them: Mongo, Kafka, Batch are read from there", "A first commit in every repo, and the repos cloned next to the central repo", "The central repo can start empty: install fills it"],
+      outputs: ["../<service> repos with a build file and one commit"],
+      rules: ["A repo with no commit, or no build file, comes back from /onboard as a question and its stack stays unknown", "The architect checks the stack against the build file on every run, so it must exist before the first design"],
+      why: "The baton never guesses a stack. A skeleton with a pinned build file is all it needs to start; there is no other code to read yet." },
+    { id: "n2", lane: "tool", kind: "Same as Installation", title: "Install the baton",
+      cmd: "python3 ~/tools/baton/tools/baton/cli.py install --no-mcp",
+      lead: "Run the install in the central repo exactly as the Installation tab says, then commit .claude/, CLAUDE.md, profile/, .gitignore and .gitattributes.",
+      outputs: [".claude/", "CLAUDE.md", "profile/ (templates to fill)"] },
+    { id: "n3", lane: "human", kind: "Product Owner + Tech Lead", title: "Fill the profile",
+      lead: "With no code, the profile is where most of the knowledge lives. Spend the time here.",
+      steps: ["profile/project.md: one row per new repo with its purpose and build command, the test environment and the variable holding its URI, Jira key, personas", "profile/domain.md: business rules, glossary, regulatory constraints, what is out of scope", "Domain words: the ten or so terms the naming checks use", "Write down decisions already made (datastore, messaging, partition key); the architect designs against them"],
+      outputs: ["profile/project.md", "profile/domain.md"],
+      why: "Agents start from facts. On a new product the facts are what people decided, so they must be written, not remembered." },
+    { id: "n4", lane: "agent", kind: "Once", title: "/onboard (short)",
+      cmd: "/onboard",
+      lead: "The extractors read the build files and find no code to map, so onboarding is short and mostly a business interview.",
+      steps: ["Stack table from the build files: Java, Spring Boot, datastore; the rest stays unknown until code exists", "Zero classes, zero edges: dependencies.yaml is empty and that is correct", "Questions are mostly invariants, mastering boundaries, ownership and default non-functional needs", "ArchUnit and PIT show as missing: the first story installs them", "Skip the wiki: there is nothing to describe yet"],
+      outputs: ["profile/stack-detected.md", "profile/dependencies.yaml (empty)", "docs/architecture/ with the repos as containers", "Agent-instructions block in CLAUDE.md"] },
+    { id: "n5", lane: "human", kind: "Same as Story flow", title: "Feature notes and stories",
+      cmd: "/stories F-001, /ready S-001",
+      lead: "Write the first feature notes and draft stories as in the Story flow tab. Make the first story a walking skeleton: one endpoint end to end with its collection, tests and sensors.",
+      steps: ["A thin first story proves the build, the sensors, the test database and the PR path before real features pile up", "Order the next stories with Depends-On: so each builds on merged work", "Gate 1 as usual: only the Product Owner sets Ready"],
+      outputs: ["docs/features/F-001-<slug>.md", "docs/stories/F-001/S-001.md ..."] },
+    { id: "n6", lane: "agent", kind: "architect agent", title: "First designs: everything is new",
+      cmd: "inside /build S-001",
+      lead: "The change spec lists almost everything under new:, and names the repo each new class goes into.",
+      steps: ["repo: <service> at the top of the change spec (or per class): a new class in an empty repo cannot be placed without it", "Full class names decide package and file, so they follow the layout in profile/project.md", "Diagrams draw everything as NEW (blue); the blast radius is empty because nothing reads it yet", "The context pack says 'not in the code yet' for each new operation and lists the collections and endpoints the story adds", "Task 1 installs ArchUnit (and PIT) when stack-detected.md says missing: In Review is refused without an ArchUnit report", "A new collection or endpoint moves a story to the full track, so expect a design review at Gate 2 on most early stories"],
+      outputs: ["docs/design/F-001/S-001-design.md", "S-001-change.yaml with repo:", "Diagrams with every element new"],
+      why: "Early designs set the patterns every later story copies. That is why they are reviewed by a person even when the change is small." },
+    { id: "n7", lane: "tool", kind: "After each merge", title: "The code grows, the knowledge follows",
+      cmd: "/onboard refresh",
+      lead: "After every merged story the documentation agent regenerates the architecture views and codebase map from the new code. From here the new project is on the existing-project path.",
+      steps: ["baton ir show starts listing classes, entry points and writes as soon as code is merged", "Run /onboard refresh after the first few stories: edges, aggregates and risk zones now exist and come back as questions for the Tech Lead", "Start the wiki (baton wiki, baton verify) once a service has modules worth describing", "Later change specs move from new: to changed:, checked against the code"],
+      outputs: ["dependencies.yaml with real edges", "docs/wiki/** once there are modules"] }
+  ];
+  var EXISTING_PATH = [
+    { id: "e1", lane: "human", kind: "Before the baton", title: "Clone and build",
+      lead: "Clone every service repo next to the central repo, on an up-to-date main, and check each one builds.",
+      steps: ["../<service> for each repo the product has", "mvn -q verify (or the repo's build command) passes on main", "Note what already exists: an AGENTS.md or CLAUDE.md, CI rules, branch protection, Confluence designs"],
+      outputs: ["Sibling repos that build"],
+      why: "The extractors read the repos as they are on disk; a stale clone gives a stale map." },
+    { id: "e2", lane: "tool", kind: "Install or upgrade", title: "Install the baton",
+      cmd: "cli.py install --check, then install --no-mcp",
+      lead: "Run --check first to see every file it would write. A repo that already has a .claude/ keeps what is its own.",
+      steps: ["No .claude/ yet: a plain install", ".claude/baton-install.json present: this is an upgrade (see Installation, Upgrade)", "A .claude/ made by hand: your own agents, skills and settings stay; CLAUDE.md and profile/* are never overwritten", "A file install wrote and you edited is a conflict: kept and reported"],
+      outputs: [".claude/", "profile/ templates where missing"] },
+    { id: "e3", lane: "human", kind: "Tech Lead", title: "Fill the profile",
+      lead: "Only what the build files cannot tell: the repo table, the test environment and its URI variable, Jira, personas, domain rules and glossary.",
+      outputs: ["profile/project.md", "profile/domain.md"] },
+    { id: "e4", lane: "agent", kind: "Once", title: "/onboard (full)",
+      cmd: "/onboard",
+      lead: "The extractors read every repo; people review what they found and answer only what code cannot show.",
+      steps: ["Stack per repo from the build files, with the build-file hash", "Every edge (collections, topics, endpoints, files) with file:line for a person to audit", "Aggregates and risk zones seeded as confirmed: false until the Tech Lead confirms them", "Existing CLAUDE.md or AGENTS.md lines go into a ledger: retain, rewrite, relocate, automate or delete, each with a reason", "Interview: only the gaps, in batches of up to eight"],
+      outputs: ["profile/stack-detected.md", "profile/dependencies.yaml", "profile/aggregates.yaml, risk-zones.yaml", "docs/architecture/", "docs/context/codebase-map.md", "Agent-instructions block in CLAUDE.md"],
+      why: "Years of code hold knowledge nobody wrote down. Extraction gets it with provenance; people only fill the gaps." },
+    { id: "e5", lane: "tool", kind: "Once, then after each merge", title: "Wiki and IR",
+      cmd: "baton wiki <repo>; baton verify <repo>",
+      lead: "Generate a wiki page per module from the code, with no model call, and verify each against the code.",
+      steps: ["Agents rely only on pages with verified: true", "baton ir show prints one line per service: the agents' starting point", "A failed page is reported with its reasons, never hand-edited"],
+      outputs: ["docs/wiki/<repo>/<module>.md", "Index in docs/context/codebase-map.md"] },
+    { id: "e6", lane: "agent", kind: "architect agent", title: "First designs: mostly changed",
+      cmd: "inside /build S-301",
+      lead: "The architect finds where the story lands through the IR, and the change spec lists mostly changed: with a few new: elements.",
+      steps: ["Every existing name is checked against the code; a typo is an error with 'did you mean'", "The blast radius lists every other repo that reads what changes, with file:line", "The context pack names the exact files and line ranges for the developer and QA", "Small changes inside existing modules stay on the light track and can auto-pass Gate 2 at confidence 80 or more"],
+      outputs: ["Design note", "Change spec", "Diagrams with NEW, CHANGED and IMPACTED"] },
+    { id: "e7", lane: "tool", kind: "Ongoing", title: "Keep it current",
+      cmd: "/onboard refresh, /onboard record",
+      lead: "The documentation agent regenerates after every story. Refresh covers what changed outside the baton.",
+      steps: ["/onboard refresh after significant work merged without the baton: shows commits, edges added and removed, and asks only new questions", "/onboard record the moment an agent gets something wrong: one occurrence is logged, a repeated one becomes a pitfall or a check"],
+      outputs: ["Refreshed generated files", "docs/context/pitfalls-log.md"] }
+  ];
+  var COMPARE = [
+    ["Before install", "Repos from a starter: build file, application class, one commit", "Repos cloned and building on main"],
+    ["Profile", "Most of the knowledge: rules, decisions, glossary", "Only what code cannot show"],
+    ["/onboard", "Short; mostly business questions; no edges yet", "Longer; people review every extracted edge and confirm risk zones"],
+    ["Wiki", "Skip until there are modules", "Generate and verify per repo"],
+    ["Change spec", "Mostly new:, with repo: named", "Mostly changed:, names checked against the code"],
+    ["Blast radius", "Empty at first", "Every reading repo, with file:line"],
+    ["Track and Gate 2", "Usually full track; a person reviews", "Light for most changes; can auto-pass at 80+"],
+    ["Sensors", "First story installs ArchUnit and PIT", "Already present, or task 1 installs them"],
+    ["Later", "Joins the existing path after the first merges", "Refresh after work done outside the baton"]
+  ];
+  var IR_LINES = [
+    { html: '<span class="kw">service</span> OrderService  order-service/.../OrderService.java:42-548', title: "The class line", lead: "Stereotype, class name, file and line range. The agent opens only this range, and only if the IR does not answer its question." },
+    { html: '  <span class="kw">injects</span> OrderRepository, PaymentRepository, OrderEventPublisher, Clock', title: "injects", lead: "The collaborators wired in by Spring. It shows the dependencies of the class without reading the constructor." },
+    { html: '  cancelOrder(command, actor): CancelOrderResult  :206-284', title: "An operation", lead: "One method, keyed by its full signature so overloads stay apart. Constructors, getters and setters are left out as noise." },
+    { html: '    <span class="kw">calls</span> OrderRepository.findById,findLines,save; PaymentRepository.save; OrderEventPublisher.publishOrderCancelled', title: "calls", lead: "The behavioural calls in order, grouped by collaborator. Calls on data objects (DTOs, documents) are hidden: they were 74% of all recorded calls." },
+    { html: '    <span class="kw">reads</span> orders', title: "reads", lead: "Collections the operation reads, including through the methods it calls, across interfaces and recursion." },
+    { html: '    <span class="kw">writes</span> order_audit_log, orders, outbox_events, payments', title: "writes", lead: "Collections it writes, directly or through calls. Here three layers down: the agent learns that cancelling an order also writes the payment, the audit log and the outbox." },
+    { html: '    <span class="kw">throws</span> NotFoundException, OrderValidationException', title: "throws", lead: "Exceptions the operation raises: the failure paths QA should test." },
+    { html: '    <span class="kw">called by</span> OrderController#cancel', title: "called by", lead: "Who calls this exact overload. Matched by signature, also through interfaces." },
+    { html: '    <span class="kw">from</span> POST /orders/{orderId}/cancel (OrderController#cancel)', title: "from", lead: "The entry points (endpoints, listeners, jobs) that reach this operation: what a change here can affect from the outside." }
+  ];
+  var BARS = [
+    { label: "Codebase map + dependencies.yaml (before)", value: 48748, color: "var(--gate)" },
+    { label: "Whole backend as IR (all 12 services)", value: 60500, color: "var(--rail)" },
+    { label: "Story context pack (IR slice)", value: 1700, color: "var(--agent)" },
+    { label: "Overview: one line per service (IR)", value: 778, color: "var(--ok)" }
+  ];
+  var HOOKS = [
+    { id: "h1", lane: "gate", kind: "Before Bash", title: "protect_main", lead: "Refuses anything that could change main without a person.", steps: ["Commits on main or master", "Pushes to main, force pushes, push --delete / --all / --mirror", "git merge, git pull without --ff-only or --rebase", "Deleting branches with -D, deleting tags, moving main with update-ref"], why: "Agents work only on feature branches; people merge." },
+    { id: "h2", lane: "gate", kind: "Before Bash", title: "protect_env", lead: "Only the test database named in the profile is reachable.", steps: ["Refuses any datastore URI literal in a command", "Refuses database clients without the profile's variable, or with another one", "Reads mongosh scripts and refuses writes"], why: "No agent can touch a production or shared database by accident." },
+    { id: "h3", lane: "gate", kind: "Before Write, Edit, Bash on a story", title: "state_gate", lead: "A story state needs its evidence.", steps: ["Design Approved needs ## Design review", "In Review needs sensor reports including a green ArchUnit run", "QA Pass needs a test report with Verdict: PASS", "Approved needs QA Pass, security report, confidence.json and human findings", "Bash writes to story files are refused so the gate can always check"], why: "Process steps cannot be skipped or claimed without proof." },
+    { id: "h4", lane: "gate", kind: "Before any read or write", title: "protect_weights", lead: "profile/confidence-weights.yaml is unreadable and unwritable for agents, directly or through a search.", why: "The agents being scored cannot learn or change how they are scored." },
+    { id: "h5", lane: "tool", kind: "After Write, Edit under docs/", title: "doc_lint", lead: "Hands documentation style problems back to the agent to fix in its next edit.", steps: ["ASCII only", "Tables for facts, bullets under 20 words, short paragraphs", "No filler phrases"], why: "Documents a reviewer can scan in seconds, in the same format across stories." },
+    { id: "h6", lane: "tool", kind: "After Read, Grep, Glob, Bash", title: "read_log", lead: "Logs which agent read which file and roughly how many tokens came back. Never the content; for Bash only the first two words.", steps: ["baton reads --story S-301 reports reads, re-reads, searches and shared files per agent"], why: "Token cost per story is measured, so savings can be proven." }
+  ];
+  var TEAM = [
+    { group: "Agents", items: [
+      { id: "a1", lane: "agent", kind: "/stories, /ready", title: "story-drafter", lead: "Drafts stories from a feature note, checks features and any story against the Definition of Ready, and lists the questions.", rules: ["Never sets Ready"] },
+      { id: "a2", lane: "agent", kind: "/build, state Ready", title: "architect", lead: "Design note, change spec, generated diagrams, blast radius, pattern ledger, design confidence and the story's context pack.", rules: ["Never writes code or hand-drawn diagrams"] },
+      { id: "a3", lane: "agent", kind: "/build, Design Approved", title: "developer", lead: "Implements the design on feature branches with tests named after each acceptance criterion; runs the sensors.", rules: ["Never commits to main", "Documents any deviation before committing it"] },
+      { id: "a4", lane: "agent", kind: "/build, In Review", title: "qa", lead: "Writes expectations from the story first, then runs review lenses, tests, data checks and mutation testing.", rules: ["Sceptical by default; no test means FAIL"] },
+      { id: "a5", lane: "agent", kind: "/build, In Review", title: "security", lead: "Security, risk and compliance review of the branch with a severity rubric." },
+      { id: "a6", lane: "agent", kind: "/ship, Approved", title: "documentation", lead: "Change note, ADRs, regenerated wiki, codebase map and architecture views.", rules: ["Never hand-edits generated pages"] },
+      { id: "a7", lane: "agent", kind: "/ship, Documented", title: "release", lead: "Opens the PR(s) with every artefact linked and records metrics.", rules: ["Never merges"] }
+    ] },
+    { group: "Commands people type", items: [
+      { id: "c1", lane: "human", kind: "once per product", title: "/onboard", lead: "Extractors plus an interview: stack, dependencies, architecture, codebase map, project facts in CLAUDE.md." },
+      { id: "c10", lane: "human", kind: "per feature, one command", title: "/deliver F-x",
+        lead: "The whole feature in one command: /stories, gate 1, /build for each story in dependency order, gate 3, /ship. It asks only at the gates.",
+        steps: ["Gate 1: the Product Owner answers Set Ready or Leave, up to four stories per prompt", "Gate 2: inside /build, asked when the track needs a person", "Gate 3: the Senior Engineer writes Human findings, the Tech Lead answers Approve, Send back or Not now", "A story waiting on an unmerged PR is skipped and listed", "Resumable: it reads every story's State, so running it again continues where it stopped"],
+        rules: ["Chains the existing skills unchanged; skips no step", "Never sets Ready or Approved without a human answer; never merges"],
+        why: "One command for the team to type, with the same gates and evidence as running each step by hand." },
+      { id: "c2", lane: "human", kind: "per feature", title: "/stories F-x", lead: "Feature check, story drafts, then /ready on the drafts." },
+      { id: "c3", lane: "human", kind: "per story", title: "/ready S-x", lead: "Definition of Ready with a clarification loop for any story." },
+      { id: "c4", lane: "human", kind: "per story", title: "/build S-x", lead: "Architect, design review, developer, QA and security with fix loops. Stops before approval." },
+      { id: "c5", lane: "human", kind: "per sprint", title: "/sprint", lead: "/build for every Ready story, one at a time." },
+      { id: "c6", lane: "human", kind: "per sprint", title: "/sprint-review", lead: "The approval pack ordered by confidence lane." },
+      { id: "c7", lane: "human", kind: "per story", title: "/ship S-x", lead: "Documentation then release: change note and PR." },
+      { id: "c8", lane: "human", kind: "daily, per sprint", title: "/standup, /retro", lead: "Status and open questions; an evidence-based retrospective whose actions become prompt, skill or threshold changes." },
+      { id: "c9", lane: "human", kind: "any time", title: "/elicitation, /review-lenses, /design-review-lenses", lead: "Structured critique (pre-mortem, red team, socratic) and the independent review lenses on demand." },
+      { id: "c10", lane: "human", kind: "after changing an agent", title: "/agent-regression", lead: "Re-runs the agents on golden stories and diffs against approved outputs before a framework release." }
+    ] },
+    { group: "Skills the agents read", items: [
+      { id: "s1", lane: "tool", kind: "every agent", title: "workflow", lead: "Principles, roles, gates, states, hooks and how to read code." },
+      { id: "s2", lane: "tool", kind: "drafter, architect", title: "triage, story-writing", lead: "Track from the Jira type and labels; how to split features and write acceptance criteria." },
+      { id: "s3", lane: "tool", kind: "architect", title: "design-diagram, design-review-lenses", lead: "The change spec format and the lenses a design passes before review." },
+      { id: "s4", lane: "tool", kind: "architect, developer", title: "standards", lead: "Stack rules, the pattern-validity ledger and the sensors (PMD, Checkstyle, ArchUnit, ESLint)." },
+      { id: "s5", lane: "tool", kind: "qa, security", title: "review-lenses, data-check, security-checklist", lead: "Edge cases, verification gaps, craft, conformance, domain fidelity; data checks; security rubric." },
+      { id: "s6", lane: "tool", kind: "documentation", title: "change-note, wiki, doc-style", lead: "Change notes and ADRs, generated and verified wiki pages, the house writing style." },
+      { id: "s7", lane: "tool", kind: "architect, qa", title: "impact", lead: "Blast radius across repos with baton impact." }
+    ] }
+  ];
+  var COMMANDS = [
+    { group: "Read the code (no AI)", items: [
+      { id: "k1", lane: "tool", kind: "orientation", title: "baton ir show", lead: "One line per service: entry points, data written, events emitted." },
+      { id: "k2", lane: "tool", kind: "detail", title: "baton ir show <Class | Class#method | collection:x>", lead: "Operations with line ranges, calls, data read and written, callers and entry points; or every reader and writer of a collection." },
+      { id: "k3", lane: "tool", kind: "search", title: "baton ir find <words>", lead: "The operations, classes and resources that match a story's words." },
+      { id: "k4", lane: "tool", kind: "per story", title: "baton ir slice S-x --write", lead: "The story's context pack in .baton/context/S-x.md: files and line ranges with reasons, shared data." },
+      { id: "k5", lane: "tool", kind: "card", title: "baton diagram context <name>", lead: "A ~20-line card with fields and tests." }
+    ] },
+    { group: "Extract and draw", items: [
+      { id: "k6", lane: "tool", kind: "onboarding", title: "baton extract-stack, extract, onboard", lead: "Stack table, dependency edges with file:line provenance, onboarding questions." },
+      { id: "k7", lane: "tool", kind: "architecture", title: "baton c4, diagram architecture", lead: "Context, container and component views generated from the code." },
+      { id: "k8", lane: "tool", kind: "per story", title: "baton diagram story S-x [--check] [--diff REF]", lead: "Design diagrams from the change spec; as-built diagrams and drift from the diff." },
+      { id: "k9", lane: "tool", kind: "per story", title: "baton impact, graph", lead: "Blast radius across repos from the dependency graph." },
+      { id: "k10", lane: "tool", kind: "knowledge", title: "baton wiki, verify", lead: "Per-module pages generated from code and verified against the extractors." }
+    ] },
+    { group: "Gates and evidence", items: [
+      { id: "k11", lane: "tool", kind: "gate 3", title: "baton confidence, evidence", lead: "The score and lane; the evidence page linking every artefact." },
+      { id: "k12", lane: "tool", kind: "checks", title: "baton state-check, deps, mutation, doclint", lead: "State prerequisites, story dependencies, mutation score, doc style." },
+      { id: "k13", lane: "tool", kind: "cost", title: "baton reads [--story S-x]", lead: "Reads, re-reads, searches and tokens per agent." },
+      { id: "k15", lane: "tool", kind: "per story, before QA", title: "baton risk S-x", lead: "Low, medium or high from the design and the diff. Low runs 2 review lenses (3 when a business rule is named), the rest all 5. Security and every gate run whatever the tier.",
+        steps: ["High: a risk-zone path, something removed or breaking, another repo affected, a new dependency, a label that forces design review", "Medium: full track, more than one repo, a new collection, topic, endpoint or file, an estimate above S", "Low: none of these", "The design and the diff are both checked: a story that grows during the build cannot stay low"],
+        why: "Review effort follows risk, as Meta and Google do, instead of every story paying for every lens." },
+      { id: "k16", lane: "tool", kind: "measure", title: "baton eval S-x / --all", lead: "Minutes, tokens and re-reads per agent, waiting between agents, and per lens how many findings only that lens found. Read from this machine's Claude Code transcripts; nothing leaves it.",
+        why: "Decide what to trim from your own numbers: a lens that never finds anything unique over 10+ stories is time spent for nothing." },
+      { id: "k17", lane: "tool", kind: "per feature", title: "baton trace F-x [--story S-x] [--open]", lead: "One page per feature: every step from feature note to merged PR, who made it (agent or human), the model and what it read, the gates, fix loops, and what the feature added to domain rules, sensors and architecture.",
+        why: "Replaces a demo and a status meeting; /ship refreshes it, /standup and /sprint-review link it." },
+      { id: "k18", lane: "tool", kind: "per story", title: "baton models S-x", lead: "The model each role runs on for this story (profile/models.yaml), and who reviews whom. A reviewer is never weaker than what it reviews; a failed QA loop moves the developer to the strong model.",
+        why: "Independent review by model as well as by context, at the cost the Tech Lead chose per track." },
+      { id: "k19", lane: "tool", kind: "versions", title: "baton stories, baton tag S-x, baton c4 --story S-x", lead: "Each story lives on story/<F>-<S> in the central repo, one commit per step; baton stories finds it on any branch. After the merge, baton tag marks the version and baton c4 --story stamps the architecture with the story that changed it.",
+        why: "The branch history is the audit trail; tags make git diff S-008..S-010 the change between two shipped stories." },
+      { id: "k14", lane: "tool", kind: "setup", title: "baton install [--from X] [--check] [--force] [--no-mcp]", lead: "Install or upgrade a project's .claude/." }
+    ] }
+  ];
+
+  /* ---------------- rendering ---------------- */
+  var panel = document.getElementById("panel");
+  var byId = {};
+  [FLOW, ALWAYS, INSTALL, HOOKS, NEW_PATH, EXISTING_PATH].forEach(function (list) { list.forEach(function (it) { byId[it.id] = it; }); });
+  TEAM.concat(COMMANDS).forEach(function (g) { g.items.forEach(function (it) { byId[it.id] = it; }); });
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function list(items) { var ul = el("ul"); items.forEach(function (t) { ul.appendChild(el("li", null, t)); }); return ul; }
+  function nodeButton(it) {
+    var b = el("button", "node " + it.lane); b.type = "button"; b.dataset.id = it.id;
+    b.appendChild(el("span", "k", it.kind)); b.appendChild(el("span", "t", it.title));
+    b.addEventListener("click", function () { select(it.id, true); });
+    return b;
+  }
+
+  var current = null;
+  function select(id, fromClick) {
+    var it = byId[id]; if (!it) return;
+    current = id;
+    document.querySelectorAll("[data-id]").forEach(function (n) { n.setAttribute("aria-current", n.dataset.id === id ? "true" : "false"); });
+    panel.innerHTML = "";
+    var kind = el("div", "kind"); var sw = el("i", "sw " + it.lane); kind.appendChild(sw); kind.appendChild(document.createTextNode((LANE_NAME[it.lane] || "") + " \u00b7 " + it.kind));
+    panel.appendChild(kind);
+    panel.appendChild(el("h3", null, it.title));
+    if (it.cmd) panel.appendChild(el("code", "cmd", it.cmd));
+    if (it.lead) panel.appendChild(el("p", "lead", it.lead));
+    if (it.steps) { panel.appendChild(el("h4", null, "What happens")); panel.appendChild(list(it.steps)); }
+    if (it.inputs || it.outputs) {
+      var io = el("div", "io");
+      if (it.inputs) { var a = el("div"); a.appendChild(el("h4", null, "Reads")); a.appendChild(list(it.inputs)); io.appendChild(a); }
+      if (it.outputs) { var b = el("div"); b.appendChild(el("h4", null, "Writes")); b.appendChild(list(it.outputs)); io.appendChild(b); }
+      panel.appendChild(io);
+    }
+    if (it.rules) { panel.appendChild(el("h4", null, "Rules")); panel.appendChild(list(it.rules)); }
+    if (it.loop) { panel.appendChild(el("h4", null, "Loop")); panel.appendChild(el("p", null, it.loop)); }
+    if (it.why) { var w = el("div", "why"); var bold = el("b", null, "Why it matters: "); w.appendChild(bold); w.appendChild(document.createTextNode(it.why)); panel.appendChild(w); }
+    var idx = FLOW.findIndex(function (f) { return f.id === id; });
+    if (idx >= 0) {
+      document.getElementById("count").textContent = "Step " + (idx + 1) + " of " + FLOW.length;
+      var nav = el("div", "nav");
+      var p = el("button", null, "\u2190 " + (idx > 0 ? FLOW[idx - 1].title : "Start")); p.type = "button"; p.disabled = idx === 0; p.onclick = function () { step(-1); };
+      var n = el("button", null, (idx < FLOW.length - 1 ? FLOW[idx + 1].title : "End") + " \u2192"); n.type = "button"; n.disabled = idx === FLOW.length - 1; n.onclick = function () { step(1); };
+      nav.appendChild(p); nav.appendChild(n); panel.appendChild(nav);
+    }
+    if (fromClick && window.matchMedia("(max-width: 900px)").matches) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function renderFlow() {
+    var host = document.getElementById("phases");
+    PHASES.forEach(function (ph, pi) {
+      var box = el("div", "phase");
+      var head = el("div", "phase-head"); head.appendChild(el("span", "n", ph.n)); head.appendChild(el("h2", null, ph.title)); head.appendChild(el("p", null, ph.note));
+      box.appendChild(head);
+      var lanes = el("div", "lanes"); lanes.style.gridTemplateColumns = "minmax(64px, 92px) repeat(" + ph.cols + ", minmax(0, 1fr))";
+      var items = FLOW.filter(function (f) { return f.phase === pi; });
+      LANES.forEach(function (lane) {
+        if (!items.some(function (f) { return f.lane === lane; })) return;
+        lanes.appendChild(el("div", "lane-label", LANE_NAME[lane]));
+        for (var c = 0; c < ph.cols; c++) {
+          var f = items.find(function (x) { return x.lane === lane && x.col === c; });
+          var cell = el("div", "cell" + (f ? "" : " empty"));
+          if (f) { cell.style.setProperty("--o", FLOW.indexOf(f)); cell.appendChild(nodeButton(f)); }
+          lanes.appendChild(cell);
+        }
+      });
+      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.setAttribute("class", "wires"); svg.setAttribute("aria-hidden", "true");
+      lanes.insertBefore(svg, lanes.firstChild);
+      box.appendChild(lanes);
+      host.appendChild(box);
+    });
+    var always = document.getElementById("always");
+    ALWAYS.forEach(function (it) { always.appendChild(nodeButton(it)); });
+    drawWires();
+  }
+
+  function drawWires() {
+    document.querySelectorAll(".phase .lanes").forEach(function (lanes, li) {
+      var marker = "arrow" + li;
+      var svg = lanes.querySelector("svg.wires"); if (!svg) return;
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      var base = lanes.getBoundingClientRect();
+      var nodes = Array.prototype.slice.call(lanes.querySelectorAll(".node"));
+      function box(n) { var r = n.getBoundingClientRect(); return { l: r.left - base.left, r: r.right - base.left, t: r.top - base.top, b: r.bottom - base.top, cx: (r.left + r.right) / 2 - base.left, cy: (r.top + r.bottom) / 2 - base.top }; }
+      var ordered = nodes.sort(function (a, b) { return FLOW.findIndex(function (f) { return f.id === a.dataset.id; }) - FLOW.findIndex(function (f) { return f.id === b.dataset.id; }); });
+      for (var i = 0; i < ordered.length - 1; i++) {
+        var a = box(ordered[i]), b = box(ordered[i + 1]);
+        var midx = (a.r + b.l) / 2;
+        var d = "M" + a.r + "," + a.cy + " H" + midx + " V" + b.cy + " H" + (b.l - 2);
+        var p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", d); p.setAttribute("marker-end", "url(#" + marker + ")"); svg.appendChild(p);
+      }
+      LOOPS.forEach(function (lp) {
+        var from = lanes.querySelector('[data-id="' + lp.from + '"]'), to = lanes.querySelector('[data-id="' + lp.to + '"]');
+        if (!from || !to) return;
+        var a = box(from), b = box(to);
+        var y = Math.min(a.t, b.t) - 11;  /* above the lanes: never across another box */
+        var d = "M" + a.cx + "," + a.t + " V" + y + " H" + b.cx + " V" + (b.t - 3);
+        var p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", d); p.setAttribute("class", "loop"); svg.appendChild(p);
+        var t = document.createElementNS("http://www.w3.org/2000/svg", "text"); t.setAttribute("x", (a.cx + b.cx) / 2 - 18); t.setAttribute("y", y - 4); t.textContent = lp.label; svg.appendChild(t);
+      });
+      var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.innerHTML = '<marker id="' + marker + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill: var(--rail); stroke: none"></path></marker>';
+      svg.insertBefore(defs, svg.firstChild);
+    });
+  }
+
+  function renderCards(hostId, groups) {
+    var host = document.getElementById(hostId);
+    groups.forEach(function (g) {
+      host.appendChild(el("h2", "group-title", g.group));
+      var grid = el("div", "cards"); g.items.forEach(function (it) { grid.appendChild(nodeButton(it)); }); host.appendChild(grid);
+    });
+  }
+  function renderInstall() { renderSteps("install-steps", INSTALL); }
+  function renderPaths() {
+    renderSteps("new-steps", NEW_PATH);
+    renderSteps("existing-steps", EXISTING_PATH);
+    var host = document.getElementById("compare");
+    host.appendChild(el("h3", null, "What differs"));
+    var head = el("div", "row head"); ["", "New project", "Existing project"].forEach(function (t) { head.appendChild(el("span", null, t)); }); host.appendChild(head);
+    COMPARE.forEach(function (r) {
+      var row = el("div", "row"); row.appendChild(el("b", null, r[0])); row.appendChild(el("span", null, r[1])); row.appendChild(el("span", null, r[2])); host.appendChild(row);
+    });
+  }
+  function renderSteps(hostId, items) {
+    var host = document.getElementById(hostId);
+    items.forEach(function (it, i) {
+      var b = nodeButton(it); b.innerHTML = "";
+      b.appendChild(el("span", "num", String(i + 1)));
+      var txt = el("span"); txt.appendChild(el("span", "k", it.kind)); txt.appendChild(el("span", "t", it.title)); b.appendChild(txt);
+      host.appendChild(b);
+    });
+  }
+  function renderIR() {
+    var host = document.getElementById("ir-block");
+    IR_LINES.forEach(function (ln, i) {
+      var id = "ir" + i; byId[id] = { id: id, lane: "tool", kind: "IR line", title: ln.title, lead: ln.lead };
+      var b = el("button", "ir-line"); b.type = "button"; b.dataset.id = id; b.innerHTML = ln.html;
+      b.addEventListener("click", function () { select(id, true); });
+      host.appendChild(b);
+    });
+    var max = Math.max.apply(null, BARS.map(function (x) { return x.value; }));
+    var bars = document.getElementById("bars");
+    BARS.forEach(function (x) {
+      var row = el("div", "bar-row"); row.appendChild(el("span", null, x.label));
+      var pct = (x.value / max) * 100;
+      var bar = el("div", "bar" + (pct > 70 ? " big" : "")); bar.style.setProperty("--w", pct + "%");
+      var fill = el("i"); fill.style.width = pct + "%"; fill.style.background = x.color; bar.appendChild(fill);
+      bar.appendChild(el("b", null, x.value.toLocaleString("en-US") + " tokens"));
+      row.appendChild(bar); bars.appendChild(row);
+    });
+  }
+
+  /* ---------------- tabs, presenter, keys ---------------- */
+  var FIRST = { flow: "feature", install: "i1", paths: "n1", ir: "ir0", safety: "h1", team: "a1", commands: "k1" };
+  function show(view) {
+    document.querySelectorAll("nav.tabs button").forEach(function (b) { b.setAttribute("aria-selected", b.dataset.view === view ? "true" : "false"); });
+    document.querySelectorAll("main > section").forEach(function (s) { s.hidden = s.id !== "view-" + view; });
+    select(FIRST[view]);
+    try { history.replaceState(null, "", "#" + view); } catch (e) { /* ignore */ }
+    if (view === "flow") drawWires();
+  }
+  document.querySelectorAll("nav.tabs button").forEach(function (b) { b.addEventListener("click", function () { stopPlay(); show(b.dataset.view); }); });
+
+  function step(d) {
+    var idx = FLOW.findIndex(function (f) { return f.id === current; });
+    if (idx < 0) idx = d > 0 ? -1 : FLOW.length;
+    var next = Math.min(FLOW.length - 1, Math.max(0, idx + d));
+    select(FLOW[next].id);
+    var node = document.querySelector('#view-flow [data-id="' + FLOW[next].id + '"]');
+    if (node && node.scrollIntoView && !window.matchMedia("(max-width: 900px)").matches) node.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    return next;
+  }
+  var timer = null;
+  var playBtn = document.getElementById("play");
+  function stopPlay() { if (timer) { clearInterval(timer); timer = null; playBtn.textContent = "Play"; } }
+  playBtn.addEventListener("click", function () {
+    if (timer) { stopPlay(); return; }
+    if (FLOW.findIndex(function (f) { return f.id === current; }) === FLOW.length - 1) select(FLOW[0].id);
+    playBtn.textContent = "Pause";
+    timer = setInterval(function () { if (step(1) === FLOW.length - 1) stopPlay(); }, 6000);
+  });
+  document.getElementById("prev").addEventListener("click", function () { stopPlay(); step(-1); });
+  document.getElementById("next").addEventListener("click", function () { stopPlay(); step(1); });
+  document.addEventListener("keydown", function (e) {
+    if (document.getElementById("view-flow").hidden) return;
+    if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if (e.key === "ArrowRight") { stopPlay(); step(1); e.preventDefault(); }
+    if (e.key === "ArrowLeft") { stopPlay(); step(-1); e.preventDefault(); }
+  });
+  window.addEventListener("resize", function () { if (!document.getElementById("view-flow").hidden) drawWires(); });
+
+  renderFlow();
+  renderInstall();
+  renderPaths();
+  renderIR();
+  renderCards("hook-cards", [{ group: "", items: HOOKS }]);
+  document.querySelector("#hook-cards .group-title").remove();
+  renderCards("team", TEAM);
+  renderCards("commands", COMMANDS);
+  var start = (location.hash || "").replace("#", "");
+  show(FIRST[start] ? start : "flow");
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawWires);
+})();
+</script>
+</html>

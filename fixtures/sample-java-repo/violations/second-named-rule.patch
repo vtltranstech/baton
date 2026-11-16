@@ -1,0 +1,16 @@
+diff --git a/src/main/java/com/example/sample/adapters/batch/QuickFeeEstimate.java b/src/main/java/com/example/sample/adapters/batch/QuickFeeEstimate.java
+new file mode 100644
+index 0000000..7052a4d
+--- /dev/null
++++ b/src/main/java/com/example/sample/adapters/batch/QuickFeeEstimate.java
+@@ -0,0 +1,10 @@
++package com.example.sample.adapters.batch;
++
++import java.math.BigDecimal;
++
++public class QuickFeeEstimate {
++
++    public BigDecimal calculateFee(BigDecimal balance, BigDecimal rate) {
++        return balance.multiply(rate);
++    }
++}

@@ -1,0 +1,9 @@
+{
+  "collection": "invoices",
+  "sampledAt": "2026-10-30T00:00:00Z",
+  "sampleSize": 100,
+  "docCount": 100,
+  "fields": {},
+  "indexes": [],
+  "unprofiled": false
+}

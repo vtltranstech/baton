@@ -1,0 +1,26 @@
+diff --git a/src/main/java/com/example/sample/adapters/batch/DecidingWriter.java b/src/main/java/com/example/sample/adapters/batch/DecidingWriter.java
+new file mode 100644
+index 0000000..1782e7b
+--- /dev/null
++++ b/src/main/java/com/example/sample/adapters/batch/DecidingWriter.java
+@@ -0,0 +1,20 @@
++package com.example.sample.adapters.batch;
++
++import com.example.sample.application.dto.FeeSummary;
++import com.example.sample.application.service.FeeCalculator;
++import org.springframework.batch.item.Chunk;
++import org.springframework.batch.item.ItemWriter;
++
++public class DecidingWriter implements ItemWriter<FeeSummary> {
++
++    private final FeeCalculator calculator;
++
++    public DecidingWriter(FeeCalculator calculator) {
++        this.calculator = calculator;
++    }
++
++    @Override
++    public void write(Chunk<? extends FeeSummary> chunk) {
++        chunk.forEach(item -> calculator.calculateFee(item.total(), item.total()));
++    }
++}

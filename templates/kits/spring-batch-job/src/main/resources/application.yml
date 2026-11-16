@@ -1,0 +1,12 @@
+# Configuration comes from the environment; no secret or environment path is committed.
+spring:
+  application:
+    name: batch-job # <job name>
+  batch:
+    jdbc:
+      initialize-schema: always # <never, once the job repository database is managed>
+  datasource:
+    url: ${JOB_REPOSITORY_URL:jdbc:h2:mem:jobrepo}
+items:
+  inbound-file: ${ITEMS_INBOUND_FILE:/data/inbound/items.csv}
+  outbound-file: ${ITEMS_OUTBOUND_FILE:/data/outbound/items.csv}

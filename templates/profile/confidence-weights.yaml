@@ -1,0 +1,26 @@
+# Owned by the Senior Engineer. Agents never read this file (protect-weights hook).
+version: 1
+signals:
+  definition_of_ready: 10
+  design_review: 10
+  change_size: 10
+  sensors: 10
+  mutation: 10
+  acceptance_coverage: 10
+  independent_review: 15
+  conformance_fidelity: 10
+  blast_radius: 15
+caps:
+  risk_zone: 50
+  breaking_contract: 40
+  unprofiled_write: 60
+  unknown_edges: 70
+  new_dependency: 70
+policy:
+  fast_lane_min: 85
+  senior_min: 60
+thresholds:
+  change_size_files: 5
+  mutation_full: 0.80
+  mutation_half: 0.60
+  sensors_loops_half: 2

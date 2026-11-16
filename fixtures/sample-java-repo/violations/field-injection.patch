@@ -1,0 +1,20 @@
+diff --git a/src/main/java/com/example/sample/application/service/FeeService.java b/src/main/java/com/example/sample/application/service/FeeService.java
+index fd190a1..cd1774e 100644
+--- a/src/main/java/com/example/sample/application/service/FeeService.java
++++ b/src/main/java/com/example/sample/application/service/FeeService.java
+@@ -7,11 +7,15 @@ import com.example.sample.domain.document.FeeAccrualDoc;
+ import com.example.sample.domain.document.FeeScheduleDoc;
+ import java.math.BigDecimal;
+ import java.util.UUID;
++import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.stereotype.Service;
+ 
+ @Service
+ public class FeeService {
+ 
++    @Autowired
++    private FeeCalculator injected;
++
+     private final FeeAccrualPort accruals;
+     private final FeeSchedulePort schedules;
+     private final FeeCalculator calculator;

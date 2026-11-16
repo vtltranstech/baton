@@ -1,0 +1,104 @@
+[
+  {
+    "id": "premature-state",
+    "hook": "state_gate",
+    "tool": "Edit",
+    "cwd": ".",
+    "input": {
+      "file_path": "docs/stories/F-100/S-199.md",
+      "old_string": "State: Design Approved",
+      "new_string": "State: In Review"
+    },
+    "expect": "archunit.txt"
+  },
+  {
+    "id": "commit-on-main",
+    "hook": "protect_main",
+    "tool": "Bash",
+    "cwd": "$MAIN_REPO",
+    "input": {
+      "command": "git commit -m 'S-199: done'"
+    },
+    "expect": "on main"
+  },
+  {
+    "id": "commit-on-main-after-cd",
+    "hook": "protect_main",
+    "tool": "Bash",
+    "cwd": ".",
+    "input": {
+      "command": "cd $MAIN_REPO && git commit -m 'S-199: done'"
+    },
+    "expect": "on main"
+  },
+  {
+    "id": "push-to-main",
+    "hook": "protect_main",
+    "tool": "Bash",
+    "cwd": ".",
+    "input": {
+      "command": "git push origin HEAD:main"
+    },
+    "expect": "Pushing to main or master is for humans"
+  },
+  {
+    "id": "merge",
+    "hook": "protect_main",
+    "tool": "Bash",
+    "cwd": ".",
+    "input": {
+      "command": "git merge feature/F-100-S-199"
+    },
+    "expect": "a human merges"
+  },
+  {
+    "id": "prod-uri",
+    "hook": "protect_env",
+    "tool": "Bash",
+    "cwd": ".",
+    "input": {
+      "command": "mongosh mongodb://prod-db.example.invalid:27017/invoices --eval 'db.invoices.countDocuments()'"
+    },
+    "expect": "literal datastore URI"
+  },
+  {
+    "id": "other-env-var",
+    "hook": "protect_env",
+    "tool": "Bash",
+    "cwd": ".",
+    "input": {
+      "command": "mongosh \"$PROD_URI\" --eval 'db.invoices.countDocuments()'"
+    },
+    "expect": "$TEST_URI"
+  },
+  {
+    "id": "write-in-test-env",
+    "hook": "protect_env",
+    "tool": "Bash",
+    "cwd": ".",
+    "input": {
+      "command": "mongosh \"$TEST_URI\" --eval 'db.invoices.deleteMany({})'"
+    },
+    "expect": "read-only"
+  },
+  {
+    "id": "read-weights",
+    "hook": "protect_weights",
+    "tool": "Read",
+    "cwd": ".",
+    "input": {
+      "file_path": "profile/confidence-weights.yaml"
+    },
+    "expect": "owned by the Senior Engineer"
+  },
+  {
+    "id": "cat-weights",
+    "hook": "protect_weights",
+    "tool": "Bash",
+    "cwd": ".",
+    "input": {
+      "command": "cat profile/confidence-*"
+    },
+    "expect": "owned by the Senior Engineer"
+  }
+]

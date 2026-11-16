@@ -1,0 +1,13 @@
+{
+  "repo": "invoice-service",
+  "diffRef": "main...HEAD",
+  "changedClasses": ["com.example.invoice.batch.OverdueJob"],
+  "score": 0.86,
+  "killed": 19,
+  "survived": 3,
+  "noCoverage": 0,
+  "notRun": false,
+  "reason": null,
+  "scope": "changed lines",
+  "classScore": 0.8
+}

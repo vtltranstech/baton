@@ -1,0 +1,123 @@
+{
+ "_doc": "Planted business branch points in shop-service; rule = the mapping a human made in central/profile/branch-points.yaml. Not branch points: the null checks and invoices.isEmpty().",
+ "branchPoints": [
+  {
+   "file": "src/main/java/com/example/shop/billing/InvoiceReminder.java",
+   "line": 13,
+   "kind": "filter",
+   "fields": [
+    "dueDate"
+   ],
+   "rule": "R1"
+  },
+  {
+   "file": "src/main/java/com/example/shop/billing/InvoiceReminder.java",
+   "line": 14,
+   "kind": "filter",
+   "fields": [
+    "status"
+   ],
+   "rule": "R2"
+  },
+  {
+   "file": "src/main/java/com/example/shop/billing/InvoiceTotals.java",
+   "line": 14,
+   "kind": "if",
+   "fields": [
+    "amount"
+   ],
+   "rule": "R4"
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/PriceRepository.java",
+   "line": 9,
+   "kind": "query",
+   "fields": [
+    "status",
+    "currencyCode"
+   ],
+   "rule": null
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/PriceResolver.java",
+   "line": 18,
+   "kind": "if",
+   "fields": [
+    "expiryDate",
+    "periodStart"
+   ],
+   "rule": "R5"
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/PriceResolver.java",
+   "line": 22,
+   "kind": "switch",
+   "fields": [
+    "customer",
+    "tier"
+   ],
+   "rule": "R3"
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/PriceResolver.java",
+   "line": 27,
+   "kind": "ternary",
+   "fields": [
+    "customer",
+    "currencyCode"
+   ],
+   "rule": null
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/PriceResolver.java",
+   "line": 31,
+   "kind": "filter",
+   "fields": [
+    "promoFlag"
+   ],
+   "rule": null
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/PricingConfig.java",
+   "line": 7,
+   "kind": "conditional-on",
+   "fields": [
+    "tier"
+   ],
+   "rule": null
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/SurchargeCalculator.java",
+   "line": 11,
+   "kind": "if",
+   "fields": [
+    "regionCode"
+   ],
+   "rule": null
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/SurchargeCalculator.java",
+   "line": 13,
+   "kind": "if",
+   "fields": [
+    "orderType"
+   ],
+   "rule": null
+  },
+  {
+   "file": "src/main/java/com/example/shop/pricing/SurchargeCalculator.java",
+   "line": 16,
+   "kind": "ternary",
+   "fields": [
+    "rushFlag"
+   ],
+   "rule": null
+  }
+ ],
+ "mapped": 5,
+ "undocumented": 7,
+ "undocumentedByModule": {
+  "billing": 0,
+  "pricing": 7
+ }
+}

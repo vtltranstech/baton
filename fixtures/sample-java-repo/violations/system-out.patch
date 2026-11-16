@@ -1,0 +1,13 @@
+diff --git a/src/main/java/com/example/sample/application/service/FeeService.java b/src/main/java/com/example/sample/application/service/FeeService.java
+index fd190a1..5c7ddf6 100644
+--- a/src/main/java/com/example/sample/application/service/FeeService.java
++++ b/src/main/java/com/example/sample/application/service/FeeService.java
+@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
+ @Service
+ public class FeeService {
+ 
++    static { System.out.println("loaded"); }
++
+     private final FeeAccrualPort accruals;
+     private final FeeSchedulePort schedules;
+     private final FeeCalculator calculator;

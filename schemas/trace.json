@@ -1,0 +1,459 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "trace.json",
+  "title": "baton trace: one feature's lineage (contracts/trace.md section 4)",
+  "type": "object",
+  "required": [
+    "version",
+    "root",
+    "feature",
+    "people",
+    "figures",
+    "stories",
+    "knowledge"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
+    "generated": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "root": {
+      "type": "string"
+    },
+    "selected": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "feature": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "state",
+        "author",
+        "date",
+        "summary",
+        "scope"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "people": {
+      "type": "object",
+      "required": [
+        "po",
+        "techLead",
+        "seniorEngineer"
+      ],
+      "properties": {
+        "po": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "techLead": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "seniorEngineer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "figures": {
+      "type": "object",
+      "required": [
+        "storiesDone",
+        "storiesTotal",
+        "gatesPassed",
+        "gatesTotal",
+        "leadTimeHours",
+        "fixLoops",
+        "confidenceMedian",
+        "lane"
+      ],
+      "properties": {
+        "storiesDone": {
+          "type": "integer"
+        },
+        "storiesTotal": {
+          "type": "integer"
+        },
+        "gatesPassed": {
+          "type": "integer"
+        },
+        "gatesTotal": {
+          "type": "integer"
+        },
+        "leadTimeHours": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "fixLoops": {
+          "type": "integer"
+        },
+        "confidenceMedian": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "lane": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "stories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "state",
+          "track",
+          "loops",
+          "acs",
+          "clarifications",
+          "nodes",
+          "timeline"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "track": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "loops": {
+            "type": "integer"
+          },
+          "acs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "text"
+              ]
+            }
+          },
+          "clarifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "q",
+                "a"
+              ]
+            }
+          },
+          "nodes": {
+            "type": "object",
+            "required": [
+              "feature",
+              "stories",
+              "gate1",
+              "design",
+              "designLenses",
+              "gate2",
+              "build",
+              "sensors",
+              "qa",
+              "confidence",
+              "gate3",
+              "docs",
+              "merged"
+            ],
+            "additionalProperties": {
+              "$ref": "#/$defs/node"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "artefact",
+                "at",
+                "kind"
+              ],
+              "properties": {
+                "artefact": {
+                  "type": "string"
+                },
+                "at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "kind": {
+                  "enum": [
+                    "agent",
+                    "human",
+                    "tool"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "knowledge": {
+      "type": "object",
+      "required": [
+        "domainLines",
+        "rules",
+        "architecture"
+      ],
+      "properties": {
+        "domainLines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "story"
+            ]
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "architecture": {
+          "type": "object",
+          "required": [
+            "before",
+            "after",
+            "added"
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": [
+        "state",
+        "path",
+        "who",
+        "metric",
+        "provenance",
+        "at",
+        "minutes",
+        "data"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "done",
+            "in_progress",
+            "failed",
+            "not_produced"
+          ]
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "who": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "kind",
+            "name"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "agent",
+                "human",
+                "tool"
+              ]
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "metric": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "agent": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "profile": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "context": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "graph": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "started": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "finished": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "tokens": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "more": {
+              "type": "object"
+            },
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "minutes": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

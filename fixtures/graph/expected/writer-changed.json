@@ -1,0 +1,33 @@
+{
+  "changedSymbols": [
+    "class:com.sample.loader.AccountWriter"
+  ],
+  "impacted": [
+    {
+      "breaking": false,
+      "file": "src/main/java/com/sample/account/AccountRepository.java",
+      "lines": "14",
+      "repo": "account-service",
+      "team": "accounts-team",
+      "via": "collection:accounts"
+    },
+    {
+      "breaking": false,
+      "file": "src/main/java/com/sample/statement/AccountReader.java",
+      "lines": "41-58",
+      "repo": "statement-batch",
+      "team": "statements-team",
+      "via": "collection:accounts"
+    },
+    {
+      "breaking": false,
+      "file": "src/main/java/com/sample/statement/AccountClient.java",
+      "lines": "52",
+      "repo": "statement-batch",
+      "team": "statements-team",
+      "via": "endpoint:GET /api/v1/accounts/{id}"
+    }
+  ],
+  "sourceRepo": "ledger-loader",
+  "unknownEdges": []
+}

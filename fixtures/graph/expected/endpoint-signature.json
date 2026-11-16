@@ -1,0 +1,26 @@
+{
+  "changedSymbols": [
+    "class:com.sample.account.AccountController",
+    "endpoint:GET /api/v1/accounts/{id}"
+  ],
+  "impacted": [
+    {
+      "breaking": true,
+      "file": "src/main/java/com/sample/loader/StatementReadyListener.java",
+      "lines": "12",
+      "repo": "ledger-loader",
+      "team": "ledger-team",
+      "via": "topic:statement.ready"
+    },
+    {
+      "breaking": true,
+      "file": "src/main/java/com/sample/statement/AccountClient.java",
+      "lines": "52",
+      "repo": "statement-batch",
+      "team": "statements-team",
+      "via": "endpoint:GET /api/v1/accounts/{id}"
+    }
+  ],
+  "sourceRepo": "account-service",
+  "unknownEdges": []
+}

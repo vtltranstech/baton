@@ -1,0 +1,22 @@
+{
+  "_comment": "Merge `rules` into the project's eslint config for components; give the API client module `apiClientRules` instead of the fetch ban. Thresholds mirror stack.md. Custom messages carry REMEDIATION: and reach `eslint --format json`.",
+  "rules": {
+    "complexity": ["error", 15],
+    "max-lines": ["warn", { "max": 200, "skipBlankLines": true, "skipComments": true }],
+    "max-lines-per-function": ["warn", { "max": 60, "skipBlankLines": true }],
+    "max-depth": ["error", 3],
+    "max-params": ["error", 4],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "@typescript-eslint/no-explicit-any": "error",
+    "no-restricted-syntax": ["error",
+      { "selector": "CallExpression[callee.name='fetch']", "message": "stack.md: no fetch inside components. REMEDIATION: call the backend from the API client module and read it through a data hook" },
+      { "selector": "TSAnyKeyword", "message": "stack.md: no any. REMEDIATION: declare the real type in types/, or use unknown and narrow it" }
+    ]
+  },
+  "apiClientRules": {
+    "no-restricted-syntax": ["error",
+      { "selector": "TSAnyKeyword", "message": "stack.md: no any. REMEDIATION: declare the real type in types/, or use unknown and narrow it" }
+    ]
+  }
+}

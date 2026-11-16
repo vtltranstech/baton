@@ -1,0 +1,1 @@
+{"story": "S-151", "tier": "high", "lenses": ["edge-case", "verification-gap", "craft", "conformance", "domain"], "reasons": [{"level": "high", "why": "label batch-job forces design review"}], "inputs": {"design": true, "diff": true}}

@@ -1,0 +1,4 @@
+# files named by a design note (section "Files and tasks"), one per line
+- ../ledger-loader/src/main/java/com/sample/loader/AccountEventPublisher.java — add a header
+../statement-batch/src/main/java/com/sample/statement/Other.java — another repo, ignored for --repo ledger-loader
+src/main/java/com/sample/loader/NewThing.java

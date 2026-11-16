@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "wiki-page-frontmatter",
+  "type": "object",
+  "required": [
+    "repo",
+    "module",
+    "generatedFrom",
+    "claims",
+    "verified"
+  ],
+  "properties": {
+    "repo": {
+      "type": "string"
+    },
+    "module": {
+      "type": "string"
+    },
+    "generatedFrom": {
+      "type": "string"
+    },
+    "claims": {
+      "type": "object",
+      "properties": {
+        "collections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "calls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verified": {
+      "type": "boolean"
+    }
+  }
+}

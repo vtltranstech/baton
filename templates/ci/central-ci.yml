@@ -1,0 +1,41 @@
+# CI for a product's central repo: the same bar for agent and human PRs (contracts/agent-enhancements.md 6).
+# Copy to .github/workflows/central-ci.yml. Python and baton come from the org's own mirror (ORG_PIP_INDEX);
+# nothing is fetched from outside the org. Branch protection on the default branch must require this job.
+name: central-ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  baton:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install baton from the org mirror
+        run: python3 -m pip install --index-url "$ORG_PIP_INDEX" baton
+        env:
+          ORG_PIP_INDEX: ${{ vars.ORG_PIP_INDEX }}
+      - name: Every changed story is in a state its artefacts allow
+        run: |
+          base="origin/${{ github.base_ref || 'main' }}"
+          for story in $(git diff --name-only "$base"...HEAD -- 'docs/stories/*/*.md'); do
+            state=$(sed -n 's/^State:[ \t]*//p' "$story" | head -1)
+            baton state-check "$story" "$state"
+          done
+      - name: Confidence and evidence for each story on this branch
+        if: startsWith(github.head_ref, 'story/')
+        run: |
+          story="$(printf %s "$GITHUB_HEAD_REF" | sed -E 's#^story/.*-([A-Za-z]+-[0-9]+)$#\1#')"
+          if ls docs/qa/*/"$story"-test-report.md >/dev/null 2>&1; then
+            baton confidence "$story" && baton evidence "$story"
+          fi
+      - name: Post evidence.md as the PR description
+        if: startsWith(github.head_ref, 'story/')
+        run: |
+          story="$(printf %s "$GITHUB_HEAD_REF" | sed -E 's#^story/.*-([A-Za-z]+-[0-9]+)$#\1#')"
+          evidence=$(ls docs/qa/*/"$story"-evidence.md 2>/dev/null | head -1)
+          [ -n "$evidence" ] && gh pr edit "${{ github.event.pull_request.number }}" --body-file "$evidence" || true
+        env:
+          GH_TOKEN: ${{ github.token }}

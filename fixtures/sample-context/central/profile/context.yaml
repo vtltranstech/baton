@@ -1,0 +1,7 @@
+domain-field-patterns: [status, type, code, date, period, tier, flag, limit, amount, rate, class, family]
+doc-sources: ["docs/legacy/**"]
+profile-max-age-days: 36500
+blocking:
+  light: [undefined-word, unresolved-edge-out]
+  full: [undefined-word, unresolved-edge-out, undocumented-branch-in-changed-module, unprofiled-write]
+interview-cap-minutes: 60

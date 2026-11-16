@@ -1,0 +1,34 @@
+{
+  "changedSymbols": [
+    "class:com.sample.loader.AccountEventPublisher",
+    "class:com.sample.loader.NewThing"
+  ],
+  "impacted": [
+    {
+      "breaking": false,
+      "file": "src/main/java/com/sample/account/AccountEventListener.java",
+      "lines": "22",
+      "repo": "account-service",
+      "team": "accounts-team",
+      "via": "topic:account.events"
+    },
+    {
+      "breaking": false,
+      "file": "src/main/java/com/sample/statement/AccountClient.java",
+      "lines": "52",
+      "repo": "statement-batch",
+      "team": "statements-team",
+      "via": "endpoint:GET /api/v1/accounts/{id}"
+    },
+    {
+      "breaking": false,
+      "file": "src/main/java/com/sample/statement/StatementListener.java",
+      "lines": "18",
+      "repo": "statement-batch",
+      "team": "statements-team",
+      "via": "topic:account.events"
+    }
+  ],
+  "sourceRepo": "ledger-loader",
+  "unknownEdges": []
+}

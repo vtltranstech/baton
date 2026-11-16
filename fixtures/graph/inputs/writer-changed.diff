@@ -1,0 +1,7 @@
+diff --git a/src/main/java/com/sample/loader/AccountWriter.java b/src/main/java/com/sample/loader/AccountWriter.java
+index 1111111..2222222 100644
+--- a/src/main/java/com/sample/loader/AccountWriter.java
++++ b/src/main/java/com/sample/loader/AccountWriter.java
+@@ -30 +30 @@ public class AccountWriter {
+-        log.info("saving");
++        log.debug("saving");

@@ -1,0 +1,12 @@
+diff --git a/pom.xml b/pom.xml
+index faae07c..481e2e6 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -21,6 +21,7 @@
+     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-batch</artifactId></dependency>
+     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-artemis</artifactId></dependency>
+     <dependency><groupId>org.springframework.kafka</groupId><artifactId>spring-kafka</artifactId></dependency>
++    <dependency><groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId></dependency>
+     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
+     <dependency><groupId>com.tngtech.archunit</groupId><artifactId>archunit-junit5</artifactId><version>1.4.1</version><scope>test</scope></dependency>
+   </dependencies>

@@ -1,0 +1,28 @@
+{
+  "note": "One patch per planted violation, against the clean tree. `checks`: which sensor must catch it, with what extra build arguments, in which report file (glob), naming which rule text.",
+  "violations": [
+    {"patch": "logic-in-controller.patch", "checks": [
+      {"sensor": "pmd", "args": [], "report": "target/pmd.xml", "rule": "NoLogicInController"}]},
+    {"patch": "raw-document-in-service.patch", "checks": [
+      {"sensor": "archunit", "args": [], "report": "target/surefire-reports/*ProjectArchitectureTest*.txt", "rule": "org.bson.Document"}]},
+    {"patch": "second-named-rule.patch", "checks": [
+      {"sensor": "archunit", "args": [], "report": "target/surefire-reports/*ProjectArchitectureTest*.txt", "rule": "calculateFee"}]},
+    {"patch": "query-without-period-key.patch", "checks": [
+      {"sensor": "pmd", "args": [], "report": "target/pmd.xml", "rule": "QueryWithoutPeriodKey"}]},
+    {"patch": "field-injection.patch", "checks": [
+      {"sensor": "archunit", "args": [], "report": "target/surefire-reports/*ArchitectureTest*.txt", "rule": "Autowired"},
+      {"sensor": "pmd", "args": ["-DskipTests"], "report": "target/pmd.xml", "rule": "NoFieldInjection"}]},
+    {"patch": "long-method.patch", "checks": [
+      {"sensor": "checkstyle", "args": [], "report": "target/checkstyle-result.xml", "rule": "MethodLength"}]},
+    {"patch": "new-dependency.patch", "checks": [
+      {"sensor": "new-dependency", "args": [], "report": null, "rule": "org.apache.commons:commons-lang3"}]},
+    {"patch": "floating-point-money.patch", "checks": [
+      {"sensor": "archunit", "args": [], "report": "target/surefire-reports/*ArchitectureTest*.txt", "rule": "BigDecimal"}]},
+    {"patch": "system-out.patch", "checks": [
+      {"sensor": "archunit", "args": [], "report": "target/surefire-reports/*ArchitectureTest*.txt", "rule": "System.out"}]},
+    {"patch": "service-knows-http.patch", "checks": [
+      {"sensor": "archunit", "args": [], "report": "target/surefire-reports/*ArchitectureTest*.txt", "rule": "maps them to HTTP"}]},
+    {"patch": "fat-batch-writer.patch", "checks": [
+      {"sensor": "archunit", "args": [], "report": "target/surefire-reports/*ProjectArchitectureTest*.txt", "rule": "ItemWriter"}]}
+  ]
+}

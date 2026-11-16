@@ -1,0 +1,12 @@
+# Configuration comes from the environment; no secret or environment URI is committed.
+spring:
+  application:
+    name: mongo-service # <service name>
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/items}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

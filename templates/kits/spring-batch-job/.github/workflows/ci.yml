@@ -1,0 +1,71 @@
+# Same-bar pipeline: every change, from a person or an agent, runs exactly these stages. There is no agent-only lane,
+# no stage behind a condition, and no flag that skips tests or sensors (-DskipTests, -Dpmd.skip, -Dcheckstyle.skip).
+# REQUIRED: branch protection on the default branch - require this workflow's `ci` check to pass and a human
+# review before merge; no direct pushes. CI without branch protection is advice, not a gate.
+# Actions are pinned by major version; dependencies resolve only through the org mirror (.mvn/settings.xml).
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest # <org runner label>
+    env:
+      ORG_MAVEN_MIRROR: ${{ vars.ORG_MAVEN_MIRROR }}
+      ROOT_PACKAGE: com.example.batchjob # <root package>
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Build
+        run: mvn -B -ntp compile
+
+      - name: Unit tests, ArchUnit, PMD, Checkstyle
+        # `verify` runs surefire (unit tests and ArchitectureTest), pmd:check, pmd:cpd-check and checkstyle:check.
+        run: mvn -B -ntp verify
+
+      - name: ArchUnit ran
+        run: test -s target/surefire-reports/${ROOT_PACKAGE}.ArchitectureTest.txt
+
+      - name: PIT on changed classes
+        # A confidence signal, not a gate (no mutationThreshold); it always runs, and says so when nothing changed.
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+          fi
+          CLASSES="$(git diff --name-only --diff-filter=d "$BASE_SHA" HEAD -- 'src/main/java/*.java' \
+            | sed -e 's#^src/main/java/##' -e 's#\.java$##' -e 's#/#.#g' \
+            | awk '{ printf "%s%s,%s$*", (NR > 1 ? "," : ""), $0, $0 }')"
+          if [ -z "$CLASSES" ]; then
+            echo "PIT: no changed class under src/main/java"
+            exit 0
+          fi
+          mvn -B -ntp test-compile org.pitest:pitest-maven:mutationCoverage \
+            -DtargetClasses="$CLASSES" -DtargetTests="${ROOT_PACKAGE}.*"
+
+      - name: Keep the sensor reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sensor-reports
+          path: |
+            target/surefire-reports/
+            target/pmd.xml
+            target/cpd.xml
+            target/checkstyle-result.xml
+            target/pit-reports/
+          if-no-files-found: ignore

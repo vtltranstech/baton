@@ -1,0 +1,15 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.baton/
+.harness/
+target/
+fixtures/**/build/
+.gradle/
+node_modules/
+*.egg-info/
+tools/baton/build/
+tools/baton/tests/project-words.local.txt

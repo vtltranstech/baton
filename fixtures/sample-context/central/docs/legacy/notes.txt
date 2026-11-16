@@ -1,0 +1,4 @@
+BILLING NOTES
+
+An Invoice is the bill sent to a customer for one billing period.
+The invoice amount must be at least 1.00, and the dueDate is always 30 days after issue.

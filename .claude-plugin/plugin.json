@@ -1,0 +1,16 @@
+{
+  "name": "baton",
+  "version": "0.2.0",
+  "description": "baton \u2014 agentic delivery for Java/React/Mongo teams: 9 agents, 3 human gates (SE reads, TL decides), Structurizr C4 model of record, mandatory ArchUnit, review lenses, hooks as law, computed gate-3 confidence. Project specifics come from the project profile/ folder.",
+  "author": {
+    "name": "Siva"
+  },
+  "keywords": [
+    "agile",
+    "baton",
+    "java",
+    "spring",
+    "react",
+    "review"
+  ]
+}

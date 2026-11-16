@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "dependencies",
+  "type": "object",
+  "required": [
+    "generated",
+    "repos"
+  ],
+  "properties": {
+    "generated": {
+      "type": "string"
+    },
+    "repos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "repo",
+          "commit",
+          "edges"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string"
+          },
+          "commit": {
+            "type": "string"
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "from",
+                "to",
+                "provenance"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "READS_COLLECTION",
+                    "WRITES_COLLECTION",
+                    "EXPOSES",
+                    "CALLS_ENDPOINT",
+                    "PUBLISHES",
+                    "CONSUMES",
+                    "READS_FILE",
+                    "WRITES_FILE",
+                    "RUNS_JOB"
+                  ]
+                },
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                },
+                "provenance": {
+                  "type": "object",
+                  "required": [
+                    "file",
+                    "line",
+                    "extractor"
+                  ],
+                  "properties": {
+                    "file": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "type": "integer"
+                    },
+                    "extractor": {
+                      "type": "string"
+                    },
+                    "commit": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "unresolved": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

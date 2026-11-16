@@ -1,0 +1,23 @@
+diff --git a/src/main/java/com/example/sample/application/service/FeeService.java b/src/main/java/com/example/sample/application/service/FeeService.java
+index fd190a1..f260896 100644
+--- a/src/main/java/com/example/sample/application/service/FeeService.java
++++ b/src/main/java/com/example/sample/application/service/FeeService.java
+@@ -7,6 +7,7 @@ import com.example.sample.domain.document.FeeAccrualDoc;
+ import com.example.sample.domain.document.FeeScheduleDoc;
+ import java.math.BigDecimal;
+ import java.util.UUID;
++import org.bson.Document;
+ import org.springframework.stereotype.Service;
+ 
+ @Service
+@@ -22,6 +23,10 @@ public class FeeService {
+         this.calculator = calculator;
+     }
+ 
++    public Document rawSummary(String accountRef) {
++        return new Document("accountRef", accountRef);
++    }
++
+     public FeeSummary summarise(String accountRef, String periodKey) {
+         BigDecimal total = accruals.findForPeriod(accountRef, periodKey).stream()
+                 .map(FeeAccrualDoc::amount)

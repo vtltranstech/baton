@@ -1,0 +1,9 @@
+# Paths where gate-3 confidence is capped. Seeded by `baton extract`; the Tech Lead reviews.
+# Set confirmed: true to keep an entry as it is. Entries still at confirmed: false are regenerated on every run.
+# Gitignore-style globs matched against diff file paths; the lowest cap wins.
+zones:
+  - name: auth
+    paths: ["**/security/**"]
+    reason: access control
+    cap: 50
+    confirmed: false

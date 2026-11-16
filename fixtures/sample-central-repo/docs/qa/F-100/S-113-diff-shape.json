@@ -1,0 +1,21 @@
+{
+  "story": "S-113",
+  "sensorLoops": 0,
+  "newDependencies": [],
+  "breakingContract": [],
+  "writesCollections": [],
+  "yagniCount": 0,
+  "repos": [
+    {
+      "repo": "invoice-service",
+      "branch": "feature/F-100-S-113",
+      "commits": 2,
+      "linesAdded": 120,
+      "linesDeleted": 10,
+      "files": [
+        "src/main/java/com/example/invoice/api/InvoiceController.java",
+        "src/test/java/com/example/invoice/api/InvoiceControllerTest.java"
+      ]
+    }
+  ]
+}

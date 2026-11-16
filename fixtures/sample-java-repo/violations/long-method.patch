@@ -1,0 +1,61 @@
+diff --git a/src/main/java/com/example/sample/application/service/FeeCalculator.java b/src/main/java/com/example/sample/application/service/FeeCalculator.java
+index 3a05d7b..6f55599 100644
+--- a/src/main/java/com/example/sample/application/service/FeeCalculator.java
++++ b/src/main/java/com/example/sample/application/service/FeeCalculator.java
+@@ -11,6 +11,56 @@ public class FeeCalculator {
+     private static final int SCALE = 2;
+     private static final BigDecimal MINIMUM_FEE = new BigDecimal("1.00");
+ 
++    public BigDecimal longRunningTotal() {
++        BigDecimal total = BigDecimal.ZERO;
++        total = total.add(BigDecimal.valueOf(0));
++        total = total.add(BigDecimal.valueOf(1));
++        total = total.add(BigDecimal.valueOf(2));
++        total = total.add(BigDecimal.valueOf(3));
++        total = total.add(BigDecimal.valueOf(4));
++        total = total.add(BigDecimal.valueOf(5));
++        total = total.add(BigDecimal.valueOf(6));
++        total = total.add(BigDecimal.valueOf(7));
++        total = total.add(BigDecimal.valueOf(8));
++        total = total.add(BigDecimal.valueOf(9));
++        total = total.add(BigDecimal.valueOf(10));
++        total = total.add(BigDecimal.valueOf(11));
++        total = total.add(BigDecimal.valueOf(12));
++        total = total.add(BigDecimal.valueOf(13));
++        total = total.add(BigDecimal.valueOf(14));
++        total = total.add(BigDecimal.valueOf(15));
++        total = total.add(BigDecimal.valueOf(16));
++        total = total.add(BigDecimal.valueOf(17));
++        total = total.add(BigDecimal.valueOf(18));
++        total = total.add(BigDecimal.valueOf(19));
++        total = total.add(BigDecimal.valueOf(20));
++        total = total.add(BigDecimal.valueOf(21));
++        total = total.add(BigDecimal.valueOf(22));
++        total = total.add(BigDecimal.valueOf(23));
++        total = total.add(BigDecimal.valueOf(24));
++        total = total.add(BigDecimal.valueOf(25));
++        total = total.add(BigDecimal.valueOf(26));
++        total = total.add(BigDecimal.valueOf(27));
++        total = total.add(BigDecimal.valueOf(28));
++        total = total.add(BigDecimal.valueOf(29));
++        total = total.add(BigDecimal.valueOf(30));
++        total = total.add(BigDecimal.valueOf(31));
++        total = total.add(BigDecimal.valueOf(32));
++        total = total.add(BigDecimal.valueOf(33));
++        total = total.add(BigDecimal.valueOf(34));
++        total = total.add(BigDecimal.valueOf(35));
++        total = total.add(BigDecimal.valueOf(36));
++        total = total.add(BigDecimal.valueOf(37));
++        total = total.add(BigDecimal.valueOf(38));
++        total = total.add(BigDecimal.valueOf(39));
++        total = total.add(BigDecimal.valueOf(40));
++        total = total.add(BigDecimal.valueOf(41));
++        total = total.add(BigDecimal.valueOf(42));
++        total = total.add(BigDecimal.valueOf(43));
++        total = total.add(BigDecimal.valueOf(44));
++        return total;
++    }
++
+     public BigDecimal calculateFee(BigDecimal balance, BigDecimal rate) {
+         BigDecimal fee = balance.multiply(rate).setScale(SCALE, RoundingMode.HALF_EVEN);
+         if (fee.compareTo(MINIMUM_FEE) < 0) {

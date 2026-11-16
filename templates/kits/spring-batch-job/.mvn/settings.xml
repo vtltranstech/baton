@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Every download goes through the org mirror. ORG_MAVEN_MIRROR is set on the developer machine and in CI;
+     credentials, if the mirror needs them, go in ~/.m2/settings.xml or CI secrets, never here. -->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <mirrors>
+    <mirror>
+      <id>org-mirror</id>
+      <name>Org Maven mirror</name>
+      <url>${env.ORG_MAVEN_MIRROR}</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>

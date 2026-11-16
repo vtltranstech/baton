@@ -1,0 +1,27 @@
+# The rule column is set by a human (PO or Tech Lead); baton context build keeps it.
+branchPoints:
+  - id: bp-0001
+    repo: shop-service
+    file: src/main/java/com/example/shop/billing/InvoiceReminder.java
+    predicate: "i -> i.getDueDate().isBefore(today)"
+    rule: R1
+  - id: bp-0002
+    repo: shop-service
+    file: src/main/java/com/example/shop/billing/InvoiceReminder.java
+    predicate: 'i -> !"PAID".equals(i.getStatus())'
+    rule: R2
+  - id: bp-0003
+    repo: shop-service
+    file: src/main/java/com/example/shop/billing/InvoiceTotals.java
+    predicate: "amount.compareTo(MINIMUM_AMOUNT) < 0"
+    rule: R4
+  - id: bp-0004
+    repo: shop-service
+    file: src/main/java/com/example/shop/pricing/PriceResolver.java
+    predicate: "price.getExpiryDate().isBefore(periodStart)"
+    rule: R5
+  - id: bp-0005
+    repo: shop-service
+    file: src/main/java/com/example/shop/pricing/PriceResolver.java
+    predicate: "customer.getTier()"
+    rule: R3

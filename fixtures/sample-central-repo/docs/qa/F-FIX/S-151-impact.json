@@ -1,0 +1,6 @@
+{
+  "sourceRepo": "invoice-service",
+  "changedSymbols": ["collection:notices"],
+  "impacted": [],
+  "unknownEdges": []
+}

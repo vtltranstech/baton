@@ -1,0 +1,24 @@
+# Which model each role runs on (contracts/models-and-activation.md section 3). Owned by the Tech Lead.
+# The skill that launches an agent reads this and passes the model; agents keep `model: inherit`.
+# `baton models <story-id>` prints what a story resolves to and refuses a file that breaks rule 1.
+version: 1
+aliases:            # map to what your gateway exposes; values are passed verbatim to Claude Code's model field
+  fast: sonnet
+  strong: opus
+  cheap: haiku
+roles:
+  story-drafter:   { light: fast,   full: fast,   spike: fast }
+  architect:       { light: fast,   full: strong, spike: strong }
+  developer:       { light: fast,   full: fast,   spike: fast }
+  design-lenses:   { light: strong, full: strong, spike: strong }   # gate 2 readers
+  review-lenses:   { light: strong, full: strong, spike: strong }   # gate 3 readers (edge, verification, craft, conformance, domain)
+  qa:              { light: fast,   full: fast,   spike: fast }     # orchestrates; the lenses above carry the judgement
+  security:        { light: strong, full: strong, spike: strong }
+  documentation:   { light: cheap,  full: fast,   spike: fast }
+  release:         { light: cheap,  full: cheap,  spike: cheap }
+escalation:
+  developer_after_qa_fail: strong          # loop 2 runs the developer on the strong model
+  developer_when_diff_shape_flags: strong  # lines over estimate or a new dependency: re-run on strong
+rules:
+  reviewer_never_weaker_than_implementer: true
+  reviewer_differs_from_implementer_when_possible: true

@@ -1,0 +1,373 @@
+{
+  "_doc": "Acceptance list for W2. Edges are in dependencies.yaml terms (contracts/artefacts.md section 2); `anchor` is extra: the source text at provenance.line. The list is exact: an extractor should produce these edges and no others on this tree. Paths under excludeFromExtraction are not part of this repo's source.",
+  "decisions": {
+    "document-annotation": "@Document declares a collection but neither reads nor writes it, and the edge kinds have nothing for declaring. It is emitted as READS_COLLECTION from the document class, on the annotation's line.",
+    "spring-data-generic": "A repository generic yields READS_COLLECTION only, as in the artefacts.md example; its target comes from the generic type's @Document. Line of the interface declaration.",
+    "call-endpoint-target": "Resolved: `endpoint:<METHOD> <base-url><path>` per graph.md. Unresolved: literal, without the method, per artefacts.md section 2 (`endpoint:${pricing.base-url}/...`), and also listed in `unresolved`.",
+    "lines": "request-mapping: the mapping annotation. rest-client-base-url: the .uri( call. kafka-listener and jms-listener: the annotation. kafka-template and jms-template: the send call. mongo-template-literal: the MongoTemplate call. flatfile-reader and flatfile-writer: the `new ...Builder` line, with the target on its .resource( line. job-builder: the `new JobBuilder` line.",
+    "values-from-yml": "fee.events-topic, rates.base-url and accrual.outbound-file resolve through src/main/resources/application.yml; ledger.base-url deliberately does not."
+  },
+  "repo": "sample-java-repo",
+  "excludeFromExtraction": [
+    "variants/",
+    "violations/",
+    "config/"
+  ],
+  "edges": [
+    {
+      "kind": "READS_COLLECTION",
+      "from": "class:com.example.sample.domain.document.FeeAccrualDoc",
+      "to": "collection:fee_accruals",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/domain/document/FeeAccrualDoc.java",
+        "line": 8,
+        "extractor": "document-annotation"
+      },
+      "anchor": "@Document(collection = \"fee_accruals\")"
+    },
+    {
+      "kind": "READS_COLLECTION",
+      "from": "class:com.example.sample.domain.document.FeeScheduleDoc",
+      "to": "collection:fee_schedules",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/domain/document/FeeScheduleDoc.java",
+        "line": 7,
+        "extractor": "document-annotation"
+      },
+      "anchor": "@Document(collection = \"fee_schedules\")"
+    },
+    {
+      "kind": "READS_COLLECTION",
+      "from": "class:com.example.sample.adapters.repository.FeeScheduleRepository",
+      "to": "collection:fee_schedules",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/repository/FeeScheduleRepository.java",
+        "line": 6,
+        "extractor": "spring-data-generic"
+      },
+      "anchor": "extends MongoRepository<FeeScheduleDoc, String>"
+    },
+    {
+      "kind": "READS_COLLECTION",
+      "from": "class:com.example.sample.adapters.repository.FeeAccrualStore",
+      "to": "collection:fee_accruals",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/repository/FeeAccrualStore.java",
+        "line": 23,
+        "extractor": "mongo-template-literal"
+      },
+      "anchor": "mongo.find(query, FeeAccrualDoc.class, \"fee_accruals\")"
+    },
+    {
+      "kind": "WRITES_COLLECTION",
+      "from": "class:com.example.sample.adapters.repository.FeeAccrualStore",
+      "to": "collection:fee_accruals",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/repository/FeeAccrualStore.java",
+        "line": 28,
+        "extractor": "mongo-template-literal"
+      },
+      "anchor": "mongo.insert(accrual, \"fee_accruals\")"
+    },
+    {
+      "kind": "EXPOSES",
+      "from": "class:com.example.sample.adapters.controller.FeeController",
+      "to": "endpoint:GET /api/v1/fees/{accountRef}",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/controller/FeeController.java",
+        "line": 23,
+        "extractor": "request-mapping"
+      },
+      "anchor": "@GetMapping(\"/{accountRef}\")"
+    },
+    {
+      "kind": "EXPOSES",
+      "from": "class:com.example.sample.adapters.controller.FeeController",
+      "to": "endpoint:POST /api/v1/fees/{accountRef}/accruals",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/controller/FeeController.java",
+        "line": 28,
+        "extractor": "request-mapping"
+      },
+      "anchor": "@PostMapping(\"/{accountRef}/accruals\")"
+    },
+    {
+      "kind": "CALLS_ENDPOINT",
+      "from": "class:com.example.sample.adapters.messaging.RateClient",
+      "to": "endpoint:GET https://rates.example.test/v1/rates/{currency}",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/messaging/RateClient.java",
+        "line": 20,
+        "extractor": "rest-client-base-url"
+      },
+      "anchor": "rest.get().uri(\"/v1/rates/{currency}\", currency)"
+    },
+    {
+      "kind": "CALLS_ENDPOINT",
+      "from": "class:com.example.sample.adapters.messaging.LedgerClient",
+      "to": "endpoint:${ledger.base-url}/v1/postings",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/messaging/LedgerClient.java",
+        "line": 19,
+        "extractor": "rest-client-base-url"
+      },
+      "anchor": "rest.post().uri(\"/v1/postings\")"
+    },
+    {
+      "kind": "CONSUMES",
+      "from": "class:com.example.sample.adapters.messaging.FeeEventListener",
+      "to": "topic:fee.events",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/messaging/FeeEventListener.java",
+        "line": 17,
+        "extractor": "kafka-listener"
+      },
+      "anchor": "@KafkaListener(topics = \"${fee.events-topic}\""
+    },
+    {
+      "kind": "PUBLISHES",
+      "from": "class:com.example.sample.adapters.messaging.AccrualPublisher",
+      "to": "topic:fee.accrual.posted",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/messaging/AccrualPublisher.java",
+        "line": 19,
+        "extractor": "kafka-template"
+      },
+      "anchor": "kafka.send(\"fee.accrual.posted\""
+    },
+    {
+      "kind": "CONSUMES",
+      "from": "class:com.example.sample.adapters.messaging.AdjustmentListener",
+      "to": "queue:FEE.ADJUSTMENT.IN",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/messaging/AdjustmentListener.java",
+        "line": 16,
+        "extractor": "jms-listener"
+      },
+      "anchor": "@JmsListener(destination = \"FEE.ADJUSTMENT.IN\")"
+    },
+    {
+      "kind": "PUBLISHES",
+      "from": "class:com.example.sample.adapters.messaging.AdjustmentListener",
+      "to": "queue:FEE.ADJUSTMENT.ACK",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/messaging/AdjustmentListener.java",
+        "line": 18,
+        "extractor": "jms-template"
+      },
+      "anchor": "jms.convertAndSend(\"FEE.ADJUSTMENT.ACK\""
+    },
+    {
+      "kind": "READS_FILE",
+      "from": "class:com.example.sample.adapters.batch.FeeAccrualJobConfig",
+      "to": "file:/data/inbound/balances.csv",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/batch/FeeAccrualJobConfig.java",
+        "line": 26,
+        "extractor": "flatfile-reader"
+      },
+      "anchor": "new FlatFileItemReaderBuilder<FeeSummary>()"
+    },
+    {
+      "kind": "WRITES_FILE",
+      "from": "class:com.example.sample.adapters.batch.FeeAccrualJobConfig",
+      "to": "file:/data/outbound/accruals.csv",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/batch/FeeAccrualJobConfig.java",
+        "line": 37,
+        "extractor": "flatfile-writer"
+      },
+      "anchor": "new FlatFileItemWriterBuilder<FeeSummary>()"
+    },
+    {
+      "kind": "RUNS_JOB",
+      "from": "class:com.example.sample.adapters.batch.FeeAccrualJobConfig",
+      "to": "job:feeAccrualJob",
+      "provenance": {
+        "file": "src/main/java/com/example/sample/adapters/batch/FeeAccrualJobConfig.java",
+        "line": 57,
+        "extractor": "job-builder"
+      },
+      "anchor": "new JobBuilder(\"feeAccrualJob\", jobRepository)"
+    }
+  ],
+  "unresolved": [
+    "endpoint:${ledger.base-url}/v1/postings"
+  ],
+  "collections": [
+    {
+      "name": "fee_accruals",
+      "owner": "class:com.example.sample.domain.document.FeeAccrualDoc",
+      "file": "src/main/java/com/example/sample/domain/document/FeeAccrualDoc.java",
+      "line": 8,
+      "compoundIndexes": [
+        "account_period"
+      ]
+    },
+    {
+      "name": "fee_schedules",
+      "owner": "class:com.example.sample.domain.document.FeeScheduleDoc",
+      "file": "src/main/java/com/example/sample/domain/document/FeeScheduleDoc.java",
+      "line": 7,
+      "compoundIndexes": []
+    }
+  ],
+  "aggregates": [
+    {
+      "name": "FeeAccrual",
+      "root": "class:com.example.sample.domain.document.FeeAccrualDoc",
+      "collection": "fee_accruals",
+      "members": [],
+      "references": [
+        "FeeSchedule"
+      ],
+      "confirmed": false
+    },
+    {
+      "name": "FeeSchedule",
+      "root": "class:com.example.sample.domain.document.FeeScheduleDoc",
+      "collection": "fee_schedules",
+      "members": [],
+      "references": [],
+      "confirmed": false
+    }
+  ],
+  "riskZoneSeeds": [
+    {
+      "reason": "money",
+      "files": [
+        "src/main/java/com/example/sample/domain/document/FeeAccrualDoc.java",
+        "src/main/java/com/example/sample/domain/document/FeeScheduleDoc.java",
+        "src/main/java/com/example/sample/application/dto/FeeSummary.java",
+        "src/main/java/com/example/sample/application/service/FeeCalculator.java",
+        "src/main/java/com/example/sample/application/service/FeeService.java",
+        "src/main/java/com/example/sample/adapters/controller/FeeController.java",
+        "src/main/java/com/example/sample/adapters/messaging/FeeEventListener.java",
+        "src/main/java/com/example/sample/adapters/messaging/RateClient.java",
+        "src/main/java/com/example/sample/application/port/RatePort.java"
+      ]
+    },
+    {
+      "reason": "outbound-file",
+      "files": [
+        "src/main/java/com/example/sample/adapters/batch/FeeAccrualJobConfig.java"
+      ]
+    }
+  ],
+  "layout": {
+    "adapters": "com.example.sample.adapters",
+    "application": "com.example.sample.application",
+    "domain": "com.example.sample.domain"
+  },
+  "stack": {
+    "repo": "sample-java-repo",
+    "build": "maven",
+    "buildCmd": "./mvnw -q verify",
+    "testCmd": "./mvnw -q test",
+    "java": "21",
+    "springBoot": "3.5.16",
+    "batch": true,
+    "datastore": "mongodb",
+    "messaging": "kafka,jms",
+    "web": "spring-mvc",
+    "ui": "unknown",
+    "packageRoot": "com.example.sample",
+    "layout": {
+      "adapters": "com.example.sample.adapters",
+      "application": "com.example.sample.application",
+      "domain": "com.example.sample.domain"
+    },
+    "archunit": "installed",
+    "pitest": "installed",
+    "buildFileSha256": "42c08db40f0320c734e9febdf24b9967b0dd53620b6bcc13e5c2ff995a608ae1"
+  },
+  "variants": [
+    {
+      "path": "variants/gradle-kts",
+      "_doc": "A separate repo for extraction; proves Gradle Kotlin DSL detection. Paths are relative to `path`.",
+      "repo": "sample-gradle-repo",
+      "edges": [
+        {
+          "kind": "READS_COLLECTION",
+          "from": "class:com.example.samplegradle.domain.document.NoteDoc",
+          "to": "collection:notes",
+          "provenance": {
+            "file": "src/main/java/com/example/samplegradle/domain/document/NoteDoc.java",
+            "line": 6,
+            "extractor": "document-annotation"
+          },
+          "anchor": "@Document(collection = \"notes\")"
+        },
+        {
+          "kind": "READS_COLLECTION",
+          "from": "class:com.example.samplegradle.adapters.repository.NoteRepository",
+          "to": "collection:notes",
+          "provenance": {
+            "file": "src/main/java/com/example/samplegradle/adapters/repository/NoteRepository.java",
+            "line": 6,
+            "extractor": "spring-data-generic"
+          },
+          "anchor": "extends MongoRepository<NoteDoc, String>"
+        },
+        {
+          "kind": "EXPOSES",
+          "from": "class:com.example.samplegradle.adapters.controller.NoteController",
+          "to": "endpoint:GET /api/v1/notes/{id}",
+          "provenance": {
+            "file": "src/main/java/com/example/samplegradle/adapters/controller/NoteController.java",
+            "line": 18,
+            "extractor": "request-mapping"
+          },
+          "anchor": "@GetMapping(\"/api/v1/notes/{id}\")"
+        }
+      ],
+      "unresolved": [],
+      "collections": [
+        {
+          "name": "notes",
+          "owner": "class:com.example.samplegradle.domain.document.NoteDoc",
+          "file": "src/main/java/com/example/samplegradle/domain/document/NoteDoc.java",
+          "line": 6,
+          "compoundIndexes": []
+        }
+      ],
+      "aggregates": [
+        {
+          "name": "Note",
+          "root": "class:com.example.samplegradle.domain.document.NoteDoc",
+          "collection": "notes",
+          "members": [],
+          "references": [],
+          "confirmed": false
+        }
+      ],
+      "layout": {
+        "adapters": "com.example.samplegradle.adapters",
+        "application": "com.example.samplegradle.application",
+        "domain": "com.example.samplegradle.domain"
+      },
+      "stack": {
+        "repo": "sample-gradle-repo",
+        "build": "gradle",
+        "buildCmd": "gradle build",
+        "testCmd": "gradle test",
+        "java": "17",
+        "springBoot": "3.5.16",
+        "batch": false,
+        "datastore": "mongodb",
+        "messaging": "unknown",
+        "web": "spring-mvc",
+        "ui": "unknown",
+        "packageRoot": "com.example.samplegradle",
+        "layout": {
+          "adapters": "com.example.samplegradle.adapters",
+          "application": "com.example.samplegradle.application",
+          "domain": "com.example.samplegradle.domain"
+        },
+        "archunit": "installed",
+        "pitest": "installed",
+        "buildFileSha256": "ac0def4519ea7a3d0715e11bee82e9be1ead099363888d9026a3c6b5e371a3d3"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "changedSymbols": [
+    "class:com.sample.loader.SettlementSender"
+  ],
+  "impacted": [],
+  "sourceRepo": "ledger-loader",
+  "unknownEdges": [
+    "queue:SETTLEMENT.IN has no known consumer in graph"
+  ]
+}

@@ -1,0 +1,23 @@
+# Run: semgrep --config sensors/semgrep/banking.yaml --error <repo>
+# Regex rules so the same text is checkable without the engine; every message carries REMEDIATION:.
+rules:
+  - id: hardcoded-secret
+    languages: [java, kotlin, typescript, javascript, yaml]
+    severity: ERROR
+    message: "Secret in source. REMEDIATION: read it from the environment or the secret store, and rotate this value"
+    pattern-regex: (?i)\b(password|passwd|secret|api[_-]?key|access[_-]?token|private[_-]?key)\b["']?\s*[:=]\s*["'][^"'$\s{][^"']{3,}["']
+  - id: identifier-in-log
+    languages: [java, kotlin]
+    severity: ERROR
+    message: "Client or account identifier in a log line. REMEDIATION: log the correlation id or a masked reference instead"
+    pattern-regex: (?i)\b(log|logger)\.(info|warn|error)\([^;]*\b(account(number|no|id|ref)?|ssn|taxid|iban|clientid|email)\b
+  - id: where-operator-query
+    languages: [java, kotlin]
+    severity: ERROR
+    message: "$where runs arbitrary JavaScript in the datastore. REMEDIATION: express the filter with typed Criteria"
+    pattern-regex: \$where
+  - id: string-built-query
+    languages: [java, kotlin]
+    severity: ERROR
+    message: "Query built by string concatenation. REMEDIATION: use typed Criteria or bound parameters"
+    pattern-regex: (?i)\b(new\s+BasicQuery|createNativeQuery|createQuery|BasicDBObject\.parse|Document\.parse)\s*\([^;]*"\s*\+

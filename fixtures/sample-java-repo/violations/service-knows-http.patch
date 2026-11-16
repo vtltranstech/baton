@@ -1,0 +1,15 @@
+diff --git a/src/main/java/com/example/sample/application/service/FeeService.java b/src/main/java/com/example/sample/application/service/FeeService.java
+index fd190a1..7cb5630 100644
+--- a/src/main/java/com/example/sample/application/service/FeeService.java
++++ b/src/main/java/com/example/sample/application/service/FeeService.java
+@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
+ @Service
+ public class FeeService {
+ 
++    public org.springframework.http.ResponseEntity<String> ping() {
++        return org.springframework.http.ResponseEntity.ok("ok");
++    }
++
+     private final FeeAccrualPort accruals;
+     private final FeeSchedulePort schedules;
+     private final FeeCalculator calculator;

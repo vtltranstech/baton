@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "branch-points",
+  "description": "profile/branch-points.yaml (contracts/context-map.md section 2). Only rule and status contested are human edits.",
+  "type": "object",
+  "required": ["branchPoints"],
+  "properties": {
+    "generated": {"type": "string"},
+    "branchPoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "repo", "module", "file", "line", "kind", "predicate", "fields", "rule", "status", "provenance"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^bp-[0-9]{4,}$"},
+          "repo": {"type": "string"},
+          "module": {"type": "string"},
+          "file": {"type": "string"},
+          "line": {"type": "integer", "minimum": 1},
+          "kind": {"enum": ["if", "switch", "ternary", "filter", "conditional-on", "query", "jsx-and"]},
+          "predicate": {"type": "string"},
+          "fields": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "rule": {"type": ["string", "null"]},
+          "status": {"enum": ["mapped", "undocumented", "contested"]},
+          "proposed": {"type": "string"},
+          "confidence": {"type": "string"},
+          "provenance": {
+            "type": "object",
+            "required": ["extractor", "commit"],
+            "properties": {
+              "extractor": {"enum": ["branch-points-java", "branch-points-java-scan", "branch-points-ts-scan"]},
+              "commit": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+# Seeded by `baton extract` during /onboard; the Tech Lead reviews.
+# Set confirmed: true to keep an entry as it is. Entries still at confirmed: false are regenerated on every run.
+# Format: contracts/artefacts.md section 3. Each entry: name, root, collection, members, references, confirmed.
+aggregates: []

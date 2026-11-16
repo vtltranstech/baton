@@ -1,0 +1,7 @@
+{
+  "note": "One patch per planted violation, against the clean tree. The clean counterpart of both is src/components/FeeSummaryCard.tsx.",
+  "violations": [
+    {"patch": "fetch-in-component.patch", "checks": [{"sensor": "eslint", "file": "src/components/FeeTotal.tsx", "rule": "no fetch inside components"}]},
+    {"patch": "explicit-any.patch", "checks": [{"sensor": "eslint", "file": "src/components/FeeBadge.tsx", "rule": "no any"}]}
+  ]
+}

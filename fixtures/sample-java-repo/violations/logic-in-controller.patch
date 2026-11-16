@@ -1,0 +1,17 @@
+diff --git a/src/main/java/com/example/sample/adapters/controller/FeeController.java b/src/main/java/com/example/sample/adapters/controller/FeeController.java
+index 67a9ef7..996bc4a 100644
+--- a/src/main/java/com/example/sample/adapters/controller/FeeController.java
++++ b/src/main/java/com/example/sample/adapters/controller/FeeController.java
+@@ -22,7 +22,11 @@ public class FeeController {
+ 
+     @GetMapping("/{accountRef}")
+     public FeeSummary summary(@PathVariable String accountRef, @RequestParam String periodKey) {
+-        return fees.summarise(accountRef, periodKey);
++        FeeSummary summary = fees.summarise(accountRef, periodKey);
++        if (summary.total().signum() < 0) {
++            return new FeeSummary(accountRef, periodKey, BigDecimal.ZERO);
++        }
++        return summary;
+     }
+ 
+     @PostMapping("/{accountRef}/accruals")

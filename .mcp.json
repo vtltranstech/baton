@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "graph": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/tools/baton/graph/mcp_server.py"]
+    }
+  }
+}

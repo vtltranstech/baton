@@ -1,0 +1,10 @@
+#!/bin/sh
+# Runs one hook with a Python that works. No Python means the action is refused, with what to do.
+root=$(cd "$(dirname "$0")/.." && pwd)
+. "$root/tools/baton/env.sh"
+if ! python=$(baton_find_python); then
+    echo "baton: refused: hooks need Python 3.11 or later on the PATH as python3 (on Windows: the py launcher), or named in BATON_PYTHON. The framework docs/quickstart.md has the setup" >&2
+    exit 2
+fi
+unset PYTHONHOME
+exec "$python" "$root/hooks/$1"

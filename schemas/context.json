@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "context-settings",
+  "description": "profile/context.yaml (contracts/context-map.md section 8). Every key is optional.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "domain-field-patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "doc-sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "profile-max-age-days": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocking": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "enum": [
+            "undefined-word",
+            "unresolved-edge-out",
+            "undocumented-branch-in-changed-module",
+            "unprofiled-write",
+            "undocumented-branch",
+            "unprofiled-collection",
+            "page-unverified",
+            "owner-unknown",
+            "no-seed"
+          ]
+        }
+      }
+    },
+    "interview-cap-minutes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ocr-languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tesseract language codes, e.g. eng, deu; each needs <code>.traineddata installed from the organisation's mirror"
+    },
+    "ocr-tessdata": {
+      "type": "string",
+      "description": "folder of .traineddata files (absolute, or relative to the central repo); nothing is downloaded"
+    },
+    "ocr-min-chars": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ocr-embedded-images": {
+      "type": "boolean"
+    },
+    "explore-parallel": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "/build-context-map: context explorers run at once (default 4)"
+    },
+    "explore-rounds": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "/build-context-map: rounds of explore, grade and fix per area before it is reported (default 3)"
+    },
+    "light-open-questions": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "gate 0: open questions a changed area may still have for light-track work (default 2); never a contradiction"
+    },
+    "question-ttl-days": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "baton context questions: days a question may stay open before it is OVERDUE for the Tech Lead (default 3)"
+    }
+  }
+}

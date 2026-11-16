@@ -1,0 +1,192 @@
+"""The context pack for one story: the operations it touches, what they read and write, who else uses that
+data, the entry points that reach it, and the exact file ranges to open, each with its reason.
+
+Seeds come from the story's change spec when it exists (changed and new members, their anchors and the
+resources they use), else from the story's words matched against the IR. Written to
+`.baton/context/<story>.md` so every agent on the story reads the same pack instead of re-deriving it.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from baton.diagram.spec import RESOURCE_PREFIXES, Ref, SpecError, parse_ref
+from baton.diagram.spec import load as load_spec
+from baton.graph.model import node_prefix
+from baton.ir import render
+from baton.ir.model import IR, Op
+
+CONTEXT_DIR = ".baton/context"
+
+
+@dataclass
+class Pack:
+    story: str
+    source: str  # "spec <path>" or "story words"
+    ops: dict[str, str] = field(default_factory=dict)  # op key -> why
+    resources: dict[str, str] = field(default_factory=dict)  # resource -> why
+    problems: list[str] = field(default_factory=list)
+
+
+def _ops_for(ir: IR, ref: Ref) -> list[Op]:
+    owner = ref.owner if ref.kind in ("method", "field") else ref.text
+    classes = [
+        c for c in ir.world.classes() if c.fqcn == owner or c.name == owner or c.fqcn.endswith("." + owner)
+    ]
+    out = []
+    for info in classes:
+        for op in ir.ops_of(info):
+            if ref.kind != "method" or op.m.name == ref.member:
+                out.append(op)
+    return out
+
+
+def _add_ref(ir: IR, pack: Pack, text: str, why: str, whole_class: bool = False) -> None:
+    ref = parse_ref(text)
+    if ref.kind == "resource" or node_prefix(text) in RESOURCE_PREFIXES:
+        pack.resources.setdefault(text, why)
+        return
+    if ref.kind == "class" and not whole_class:
+        return  # a class is context, its methods are named elsewhere in the spec
+    ops = _ops_for(ir, ref)
+    if not ops:
+        pack.problems.append(f"{text} is not in the code yet")
+    for op in ops:
+        if ref.kind == "class" and render.trivial(op.m):
+            continue
+        pack.ops.setdefault(op.key, f"{why}: {ref.text}")
+        for impl in ir.implementations(op.key):
+            pack.ops.setdefault(impl, f"implements {op.label}, {why}: {ref.text}")
+
+
+def from_spec(ir: IR, story: str, path: Path) -> Pack:
+    spec = load_spec(path)
+    pack = Pack(story, f"spec {path.name}")
+    for ref in spec.changed:
+        _add_ref(ir, pack, ref.text, "changed", whole_class=True)
+    for changed in spec.changed_methods:
+        _add_ref(ir, pack, changed.ref.text, "changed")
+        for call in changed.calls:
+            _add_ref(ir, pack, call.text, "called by the change")
+        for _kind, resource in changed.uses:
+            pack.resources.setdefault(resource, "used by the change")
+    for ref in spec.removed:
+        _add_ref(ir, pack, ref.text, "removed", whole_class=True)
+    for new in spec.new_methods:
+        for anchor in new.called_from:
+            _add_ref(ir, pack, anchor.text, f"calls the new {new.ref.text}")
+        if new.before:
+            _add_ref(ir, pack, new.before.text, f"runs after the new {new.ref.text}")
+        for call in new.calls:
+            _add_ref(ir, pack, call.text, f"called by the new {new.ref.text}")
+        for _kind, resource in new.uses:
+            pack.resources.setdefault(resource, f"used by the new {new.ref.text}")
+    for new in spec.new_classes:
+        for used in new.uses:
+            for op in _ops_for(ir, parse_ref(used)):
+                if not render.trivial(op.m):
+                    pack.ops.setdefault(op.key, f"used by the new {new.name}")
+    return pack
+
+
+def from_words(ir: IR, story: str, text: str, limit: int = 6) -> Pack:
+    pack = Pack(story, "story words (no change spec yet)")
+    by_label = {op.label: op for op in ir.ops.values()}
+    for score, ident, _line in render.find(ir, text, limit=limit * 3):
+        if len(pack.ops) + len(pack.resources) >= limit:
+            break
+        if ident in by_label:
+            key = by_label[ident].key
+            pack.ops.setdefault(key, f"matches the story ({score:.1f})")
+            for impl in ir.implementations(key):
+                pack.ops.setdefault(impl, f"implements {ident}")
+        elif node_prefix(ident) in RESOURCE_PREFIXES:
+            pack.resources.setdefault(ident, f"matches the story ({score:.1f})")
+    return pack
+
+
+def _commits(ir: IR, pack: Pack) -> str:
+    repos = sorted({ir.ops[k].info.repo for k in pack.ops}) or sorted(ir.world.maps)
+    return ", ".join(f"{repo} @ {ir.world.maps[repo].commit}" for repo in repos if repo in ir.world.maps)
+
+
+def render_pack(ir: IR, pack: Pack, budget: int) -> str:
+    world = ir.world
+    head = [
+        f"# Context for {pack.story}",
+        "",
+        f"Generated by `baton ir slice` from {pack.source}; code at {_commits(ir, pack)}.",
+        "Read this instead of the codebase map and the wiki. Open only the ranges below; for anything else "
+        "run `baton ir show <Class | Class#method | resource>` before opening a file.",
+        "",
+        render.LEGEND,
+        "",
+        "## Open these",
+    ]
+    ops = [ir.ops[k] for k in pack.ops]
+    opens = []
+    for op in ops:
+        opens.append(f"- {op.info.repo}/{op.info.file}:{op.m.start}-{op.m.end} - {pack.ops[op.key]}")
+    tests = sorted(
+        {
+            (op.info.repo, t)
+            for op in ops
+            for t in op.info.tests
+            if Path(t).stem.startswith(op.info.name)  # FeeServiceTest, not every test that mentions it
+        }
+    )
+    for repo, test in tests[:4]:
+        opens.append(f"- {repo}/{test} - test of a touched class")
+    if not opens:
+        opens.append("- nothing matched; run `baton ir find <words>`")
+    body = ["", "## Operations"]
+    by_class: dict[str, set[str]] = {}
+    for op in ops:
+        by_class.setdefault(op.info.fqcn, set()).add(op.key)
+    for fqcn in sorted(by_class):
+        body.append("```text")
+        body += render.class_lines(ir, world.cls(fqcn), callers=True, reach=True, only=by_class[fqcn])
+        body.append("```")
+    touched = set(pack.resources)
+    for op in ops:
+        touched |= {e.resource for e in ir.effects(op.key)}
+    shared = []
+    for resource in sorted(touched):
+        others = sorted(
+            {
+                f"{render.VERB.get(e.kind, e.kind)} {o.label}"
+                for o, e in ir.users_of(resource)
+                if e.own and o.key not in pack.ops
+            }
+        )
+        why = pack.resources.get(resource, "touched by these operations")
+        line = f"- {resource} - {why}"
+        if others:
+            more = f" (+{len(others) - 8})" if len(others) > 8 else ""
+            line += f"; also {', '.join(others[:8])}{more}"
+        shared.append(line)
+    tail = ["", "## Data and messages", *(shared or ["- none"])]
+    if pack.problems:
+        tail += ["", "## Not in the code", *[f"- {p}" for p in pack.problems]]
+    text = "\n".join(head + opens + body + tail) + "\n"
+    if render.tokens(text) > budget:
+        trimmed = [line for line in body if not line.strip().startswith(("called by", "from "))]
+        text = "\n".join(head + opens + trimmed + tail) + "\n"
+    if render.tokens(text) > budget:
+        keep = int(budget * 3.6)
+        text = (
+            text[:keep].rsplit("\n", 1)[0]
+            + "\n```\n\n(trimmed to the budget; run `baton ir show` on a class above)\n"
+        )
+    return text
+
+
+def write(central: Path, story: str, text: str) -> Path:
+    path = Path(central) / CONTEXT_DIR / f"{story}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
+__all__ = ["CONTEXT_DIR", "Pack", "SpecError", "from_spec", "from_words", "render_pack", "write"]

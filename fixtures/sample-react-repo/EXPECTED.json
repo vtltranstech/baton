@@ -1,0 +1,41 @@
+{
+  "_doc": "Acceptance list for W2. A UI repo: one REST call is planted; java, Spring and datastore facts are unknown.",
+  "repo": "sample-react-repo",
+  "excludeFromExtraction": [
+    "violations/",
+    "config/"
+  ],
+  "edges": [
+    {
+      "kind": "CALLS_ENDPOINT",
+      "from": "class:src.api.feeClient",
+      "to": "endpoint:GET /api/v1/fees/{accountRef}",
+      "provenance": {
+        "file": "src/api/feeClient.ts",
+        "line": 4,
+        "extractor": "ts-fetch"
+      }
+    }
+  ],
+  "unresolved": [],
+  "collections": [],
+  "aggregates": [],
+  "layout": {},
+  "stack": {
+    "repo": "sample-react-repo",
+    "build": "npm",
+    "buildCmd": "npm run build",
+    "testCmd": "unknown",
+    "java": "unknown",
+    "springBoot": "unknown",
+    "batch": false,
+    "datastore": "unknown",
+    "messaging": "unknown",
+    "web": "unknown",
+    "ui": "react",
+    "packageRoot": "unknown",
+    "archunit": "missing",
+    "pitest": "missing",
+    "buildFileSha256": "dad60506dcf6a2ecfc795a846c507f621e8306c5f5f52074d1415c59886e6b6f"
+  }
+}

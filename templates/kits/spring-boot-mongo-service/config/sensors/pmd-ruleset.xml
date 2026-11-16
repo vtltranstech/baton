@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ruleset name="baton-sensors" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+  <description>Complexity and forbidden-pattern sensors (core, Java/Spring). Project invariants go in profile/sensors/. Thresholds live here and in stack.md; change both. Every rule's message carries REMEDIATION: and reaches target/pmd.xml and the console.</description>
+
+  <!-- Complexity -->
+  <rule ref="category/java/design.xml/CyclomaticComplexity" message="Too many branches. REMEDIATION: extract the branches into named methods"><properties><property name="methodReportLevel" value="10"/><property name="classReportLevel" value="60"/></properties></rule>
+  <rule ref="category/java/design.xml/CognitiveComplexity" message="Hard to follow. REMEDIATION: flatten with guard clauses and extract named methods"><properties><property name="reportLevel" value="15"/></properties></rule>
+  <rule ref="category/java/design.xml/NPathComplexity" message="Too many paths. REMEDIATION: split the method so each part can be tested alone"><properties><property name="reportLevel" value="200"/></properties></rule>
+  <rule ref="category/java/design.xml/ExcessiveParameterList" message="Too many parameters. REMEDIATION: group the related parameters into a record"><properties><property name="minimum" value="6"/></properties></rule>
+  <rule ref="category/java/design.xml/GodClass" message="God class. REMEDIATION: split it along its responsibilities"/>
+  <rule ref="category/java/design.xml/CouplingBetweenObjects" message="Too many collaborators. REMEDIATION: split the class or depend on a narrower port"><properties><property name="threshold" value="20"/></properties></rule>
+  <rule ref="category/java/design.xml/TooManyMethods" message="Too many methods. REMEDIATION: split the class along its responsibilities"><properties><property name="maxmethods" value="25"/></properties></rule>
+
+  <!-- Forbidden patterns (stack.md) -->
+  <rule ref="category/java/design.xml/AvoidCatchingGenericException" message="Catch-all. REMEDIATION: catch the specific exception this code can handle"/>
+  <rule ref="category/java/errorprone.xml/EmptyCatchBlock" message="Swallowed exception. REMEDIATION: handle it, or let it reach the edge mapping"/>
+  <rule ref="category/java/bestpractices.xml/AvoidReassigningParameters" message="Reassigned parameter. REMEDIATION: use a new local variable"/>
+  <rule ref="category/java/design.xml/MutableStaticState" message="Mutable static state. REMEDIATION: make it final, or move the state into an instance"/>
+  <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod" message="Unused private method. REMEDIATION: delete it"/>
+  <rule ref="category/java/bestpractices.xml/UnusedPrivateField" message="Unused private field. REMEDIATION: delete it"/>
+
+  <!-- Field injection -->
+  <rule name="NoFieldInjection" language="java" message="Field injection (stack.md: constructor injection only). REMEDIATION: remove @Autowired from the field; take the dependency as a final field set in the constructor" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Constructor injection only.</description>
+    <priority>2</priority>
+    <properties><property name="xpath"><value><![CDATA[//FieldDeclaration[pmd-java:hasAnnotation('org.springframework.beans.factory.annotation.Autowired')]]]></value></property></properties>
+  </rule>
+
+  <!-- Business logic in a controller (stack.md: controllers validate, call one service method, map) -->
+  <rule name="NoLogicInController" language="java" message="Business logic in a controller. REMEDIATION: move the branch, loop or arithmetic into a service method and call that one method" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>A controller method holds no branch, loop or arithmetic.</description>
+    <priority>2</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//ClassDeclaration[pmd-java:hasAnnotation('org.springframework.web.bind.annotation.RestController') or pmd-java:hasAnnotation('org.springframework.stereotype.Controller')]
+  //MethodDeclaration//(IfStatement|ForStatement|ForeachStatement|WhileStatement|DoStatement|SwitchStatement|InfixExpression[@Operator=('*','/','%','-')]|MethodCall[@MethodName=('multiply','divide','subtract','remainder')])
+]]></value></property></properties>
+  </rule>
+</ruleset>

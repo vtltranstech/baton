@@ -1,0 +1,7 @@
+diff --git a/src/main/java/com/sample/loader/SettlementSender.java b/src/main/java/com/sample/loader/SettlementSender.java
+index 1111111..2222222 100644
+--- a/src/main/java/com/sample/loader/SettlementSender.java
++++ b/src/main/java/com/sample/loader/SettlementSender.java
+@@ -45 +45 @@ public class SettlementSender {
+-        retries = 1;
++        retries = 2;

@@ -1,0 +1,39 @@
+[project]
+name = "baton"
+version = "0.2.0"
+description = "baton CLI: deterministic extractors, graph, confidence and evidence for the BATON framework"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+
+profile = ["pymongo"]        # W3 only
+pdf = ["pypdfium2>=4"]  # baton context ingest: PDF text and page images for OCR; from the org's PyPI mirror
+treesitter = ["tree-sitter>=0.23", "tree-sitter-java>=0.23"]  # first-choice Java parser; JavaParser, then regex, without it
+dev = ["pytest", "ruff", "jsonschema"]
+
+[project.scripts]
+baton = "baton.cli:main"
+pod = "baton.cli:main"  # deprecated alias for one release (contracts/models-and-activation.md section 4)
+harness = "baton.cli:main"  # deprecated alias, the first name
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"baton" = "."}
+
+[tool.setuptools.package-data]
+baton = ["trace/template.html", "wiki/prompt.md", "extract/vendor/*", "extract/helpers/*"]
+
+[tool.pytest.ini_options]
+pythonpath = [".."]
+addopts = "--import-mode=importlib"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

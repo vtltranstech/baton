@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "stack-detected",
+  "type": "object",
+  "required": [
+    "generated",
+    "repos"
+  ],
+  "properties": {
+    "generated": {
+      "type": "string"
+    },
+    "repos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "repo",
+          "build",
+          "buildCmd",
+          "testCmd",
+          "java",
+          "archunit",
+          "pitest",
+          "buildFileSha256"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string"
+          },
+          "build": {
+            "enum": [
+              "maven",
+              "gradle",
+              "npm",
+              "unknown"
+            ]
+          },
+          "buildCmd": {
+            "type": "string"
+          },
+          "testCmd": {
+            "type": "string"
+          },
+          "java": {
+            "type": "string"
+          },
+          "springBoot": {
+            "type": "string"
+          },
+          "batch": {
+            "type": "boolean"
+          },
+          "datastore": {
+            "type": "string"
+          },
+          "messaging": {
+            "type": "string"
+          },
+          "web": {
+            "type": "string"
+          },
+          "ui": {
+            "type": "string"
+          },
+          "packageRoot": {
+            "type": "string"
+          },
+          "layout": {
+            "type": "object",
+            "properties": {
+              "adapters": {
+                "type": "string"
+              },
+              "application": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              }
+            }
+          },
+          "archunit": {
+            "enum": [
+              "installed",
+              "missing"
+            ]
+          },
+          "pitest": {
+            "enum": [
+              "installed",
+              "missing"
+            ]
+          },
+          "buildFileSha256": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

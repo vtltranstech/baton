@@ -1,0 +1,17 @@
+# field names (lowercase, substring match) masked by baton profile; patterns are in tools/baton/profile/masking.py
+names:
+  - ssn
+  - tin
+  - taxid
+  - accountnumber
+  - acctno
+  - iban
+  - routing
+  - email
+  - phone
+  - dob
+  - dateofbirth
+  - address
+  - firstname
+  - lastname
+  - fullname

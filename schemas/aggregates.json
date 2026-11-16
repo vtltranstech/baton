@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "aggregates",
+  "type": "object",
+  "required": [
+    "aggregates"
+  ],
+  "properties": {
+    "aggregates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "root",
+          "collection",
+          "confirmed"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "root": {
+            "type": "string"
+          },
+          "collection": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmed": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

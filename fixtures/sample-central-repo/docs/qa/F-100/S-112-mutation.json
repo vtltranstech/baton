@@ -1,0 +1,13 @@
+{
+  "repo": "invoice-service",
+  "diffRef": "main...HEAD",
+  "changedClasses": [
+    "com.example.invoice.api.InvoiceController"
+  ],
+  "score": 0.85,
+  "killed": 17,
+  "survived": 3,
+  "noCoverage": 0,
+  "notRun": false,
+  "reason": null
+}

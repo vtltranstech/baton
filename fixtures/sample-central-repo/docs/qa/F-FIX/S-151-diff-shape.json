@@ -1,0 +1,22 @@
+{
+  "story": "S-151",
+  "sensorLoops": 0,
+  "newDependencies": [],
+  "breakingContract": [],
+  "writesCollections": ["notices", "invoices"],
+  "yagniCount": 0,
+  "repos": [
+    {
+      "repo": "invoice-service",
+      "branch": "feature/F-FIX-S-151",
+      "commits": 3,
+      "linesAdded": 410,
+      "linesDeleted": 12,
+      "files": [
+        "src/main/java/com/example/invoice/batch/OverdueJob.java",
+        "src/main/java/com/example/invoice/batch/NoticeDoc.java",
+        "src/test/java/com/example/invoice/batch/OverdueJobTest.java"
+      ]
+    }
+  ]
+}

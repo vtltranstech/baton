@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "models.json",
+  "title": "profile/models.yaml: model per role and track (contracts/models-and-activation.md section 3)",
+  "description": "Alias strength order is cheap < fast < strong; `baton models` refuses a file where a reviewer role is weaker than the role it reviews.",
+  "type": "object",
+  "required": ["version", "aliases", "roles", "rules"],
+  "additionalProperties": false,
+  "$defs": {
+    "alias": {"enum": ["cheap", "fast", "strong"]},
+    "tracks": {
+      "type": "object",
+      "required": ["light", "full", "spike"],
+      "additionalProperties": false,
+      "properties": {
+        "light": {"$ref": "#/$defs/alias"},
+        "full": {"$ref": "#/$defs/alias"},
+        "spike": {"$ref": "#/$defs/alias"}
+      }
+    }
+  },
+  "properties": {
+    "version": {"type": "integer"},
+    "aliases": {
+      "type": "object",
+      "required": ["cheap", "fast", "strong"],
+      "additionalProperties": false,
+      "properties": {
+        "cheap": {"type": "string", "minLength": 1},
+        "fast": {"type": "string", "minLength": 1},
+        "strong": {"type": "string", "minLength": 1}
+      }
+    },
+    "roles": {
+      "type": "object",
+      "required": ["story-drafter", "architect", "developer", "design-lenses", "review-lenses", "qa", "security",
+                   "documentation", "release"],
+      "additionalProperties": false,
+      "properties": {
+        "story-drafter": {"$ref": "#/$defs/tracks"},
+        "architect": {"$ref": "#/$defs/tracks"},
+        "developer": {"$ref": "#/$defs/tracks"},
+        "design-lenses": {"$ref": "#/$defs/tracks"},
+        "review-lenses": {"$ref": "#/$defs/tracks"},
+        "qa": {"$ref": "#/$defs/tracks"},
+        "security": {"$ref": "#/$defs/tracks"},
+        "documentation": {"$ref": "#/$defs/tracks"},
+        "release": {"$ref": "#/$defs/tracks"}
+      }
+    },
+    "escalation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "developer_after_qa_fail": {"$ref": "#/$defs/alias"},
+        "developer_when_diff_shape_flags": {"$ref": "#/$defs/alias"}
+      }
+    },
+    "rules": {
+      "type": "object",
+      "required": ["reviewer_never_weaker_than_implementer", "reviewer_differs_from_implementer_when_possible"],
+      "additionalProperties": false,
+      "properties": {
+        "reviewer_never_weaker_than_implementer": {"const": true},
+        "reviewer_differs_from_implementer_when_possible": {"type": "boolean"}
+      }
+    }
+  }
+}

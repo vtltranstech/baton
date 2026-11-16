@@ -1,0 +1,1269 @@
+{
+ "version": 1,
+ "generated": null,
+ "root": "<central>",
+ "selected": null,
+ "feature": {
+  "id": "F-FIX",
+  "title": "Clerks see which invoices are overdue",
+  "state": "In progress",
+  "author": "Pat Example",
+  "date": "2026-11-02T00:00:00Z",
+  "summary": "Every morning each clerk sees the invoices that became overdue, and the customer gets a notice.",
+  "scope": [
+   "Overdue list for one billing period.",
+   "One notice per overdue invoice."
+  ]
+ },
+ "people": {
+  "po": "Pat Example",
+  "techLead": null,
+  "seniorEngineer": null
+ },
+ "figures": {
+  "storiesDone": 1,
+  "storiesTotal": 2,
+  "gatesPassed": 4,
+  "gatesTotal": 6,
+  "leadTimeHours": 82.3,
+  "fixLoops": 1,
+  "confidenceMedian": 86,
+  "lane": "senior"
+ },
+ "stories": [
+  {
+   "id": "S-151",
+   "title": "Flag overdue invoices every morning",
+   "path": "docs/stories/F-FIX/S-151.md",
+   "jiraType": "Story",
+   "labels": [
+    "batch-job"
+   ],
+   "track": "full",
+   "estimate": "M",
+   "state": "Done",
+   "readiness": "9/9",
+   "loops": 0,
+   "branch": null,
+   "acs": [
+    {
+     "id": "AC1",
+     "text": "Given an unpaid invoice 31 days past its due date in invoices, when the morning job runs, then it is flagged overdue.",
+     "test": "OverdueJobTest#flagsAfter30Days",
+     "result": "PASS",
+     "evidence": "check_overdue.js p=2026-10, flagged=12"
+    },
+    {
+     "id": "AC2",
+     "text": "Given an invoice paid yesterday, when the job runs, then it is not flagged.",
+     "test": "OverdueJobTest#paidIsNotFlagged",
+     "result": "PASS",
+     "evidence": "flagged=0 of 5 paid"
+    },
+    {
+     "id": "AC3",
+     "text": "Given an overdue invoice, when the job runs twice, then the customer gets one notice in notices.",
+     "test": "OverdueJobTest#rerunSendsOneNotice",
+     "result": "PASS",
+     "evidence": "notices=12 after 2 runs"
+    }
+   ],
+   "clarifications": [
+    {
+     "q": "When is an invoice overdue?",
+     "a": "30 days after its due date when unpaid.",
+     "date": "2026-11-02T00:00:00Z",
+     "domainLine": "An invoice is overdue 30 days after its due date when it is unpaid.",
+     "domainId": null
+    }
+   ],
+   "openQuestions": [
+    "(none)"
+   ],
+   "nodes": {
+    "feature": {
+     "state": "done",
+     "path": "docs/features/F-FIX-overdue-invoices.md",
+     "who": {
+      "kind": "human",
+      "name": "PO Pat Example"
+     },
+     "metric": "feature note",
+     "provenance": null,
+     "at": "2026-11-02T00:00:00Z",
+     "minutes": null,
+     "data": {
+      "summary": "Every morning each clerk sees the invoices that became overdue, and the customer gets a notice.",
+      "scope": [
+       "Overdue list for one billing period.",
+       "One notice per overdue invoice."
+      ],
+      "problem": "Clerks find overdue invoices by sorting a spreadsheet each morning. Late reminders cost goodwill.",
+      "noTechWords": true
+     }
+    },
+    "stories": {
+     "state": "done",
+     "path": "docs/stories/F-FIX/S-151.md",
+     "who": {
+      "kind": "agent",
+      "name": "story-drafter"
+     },
+     "metric": "2 stories",
+     "provenance": {
+      "agent": "story-drafter",
+      "skills": [
+       "story-writing",
+       "triage"
+      ],
+      "profile": [
+       "domain.md#rules",
+       "project.md#personas"
+      ],
+      "commit": "1a2b3c4",
+      "started": "2026-11-02T09:00:00Z",
+      "finished": "2026-11-02T09:12:00Z",
+      "tokens": 8200
+     },
+     "at": "2026-11-02T09:12:00Z",
+     "minutes": 12.0,
+     "data": {
+      "stories": [
+       {
+        "id": "S-151",
+        "title": "Flag overdue invoices every morning",
+        "jiraType": "Story",
+        "labels": "batch-job",
+        "track": "full",
+        "estimate": "M",
+        "state": "Done",
+        "readiness": "9/9",
+        "path": "docs/stories/F-FIX/S-151.md"
+       },
+       {
+        "id": "S-152",
+        "title": "Show the overdue list for a billing period",
+        "jiraType": "Task",
+        "labels": "none",
+        "track": "light",
+        "estimate": "S",
+        "state": "Designed",
+        "readiness": "9/9",
+        "path": "docs/stories/F-FIX/S-152.md"
+       }
+      ]
+     }
+    },
+    "gate1": {
+     "state": "done",
+     "path": "docs/stories/F-FIX/S-151.md",
+     "who": {
+      "kind": "human",
+      "name": "PO"
+     },
+     "metric": "Ready",
+     "provenance": null,
+     "at": "2026-11-02T11:00:00Z",
+     "minutes": null,
+     "data": {
+      "decision": "Ready",
+      "by": "PO",
+      "readiness": "2026-11-02 11:00 checklist\nScore: 9/9"
+     }
+    },
+    "design": {
+     "state": "done",
+     "path": "docs/design/F-FIX/S-151-design.md",
+     "who": {
+      "kind": "agent",
+      "name": "architect"
+     },
+     "metric": "confidence 82%",
+     "provenance": {
+      "agent": "architect",
+      "skills": [
+       "design-diagram",
+       "standards",
+       "design-review-lenses"
+      ],
+      "profile": [
+       "domain.md#rules-touched(R1)",
+       "project.md#repos",
+       "stack-detected.md"
+      ],
+      "context": [
+       "docs/wiki/invoice-service/billing.md@5d6e7f8"
+      ],
+      "graph": "impact.json (1 repo, 0 unknown edges)",
+      "model": "strong (opus)",
+      "commit": "5d6e7f8",
+      "started": "2026-11-03T10:00:00Z",
+      "finished": "2026-11-03T10:40:00Z",
+      "tokens": 41200
+     },
+     "at": "2026-11-03T10:40:00Z",
+     "minutes": 40.0,
+     "data": {
+      "track": "full",
+      "revision": 1,
+      "challenge": {
+       "strawman": "a scheduled method in InvoiceService that queries unpaid invoices and sets a flag.",
+       "failures": "AC3 - a rerun sends a second notice; the strawman has no record of notices sent.",
+       "chosen": "OverdueJob writes one row per invoice to a new notices collection, keyed by invoice id, so a rerun is a no-op."
+      },
+      "change": "A Spring Batch job with one step; the writer upserts by invoice id.",
+      "rulesTouched": "An invoice belongs to exactly one customer - the notice goes to that customer only.",
+      "flowSvg": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MjAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgNDIwIDEyMCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTMiPjxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSI0MCIgcng9IjYiIGZpbGw9IiNkYmU4ZmYiIHN0cm9rZT0iIzFmNWZiZiIvPjx0ZXh0IHg9IjcwIiB5PSI2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+T3ZlcmR1ZUpvYjwvdGV4dD48cmVjdCB4PSIyOTAiIHk9IjEwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjQwIiByeD0iNiIgZmlsbD0iI2ZmZjFkZCIgc3Ryb2tlPSIjYjY1YTBiIi8+PHRleHQgeD0iMzUwIiB5PSIzNSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aW52b2ljZXM8L3RleHQ+PHJlY3QgeD0iMjkwIiB5PSI3MCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSI0MCIgcng9IjYiIGZpbGw9IiNkYmU4ZmYiIHN0cm9rZT0iIzFmNWZiZiIvPjx0ZXh0IHg9IjM1MCIgeT0iOTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPm5vdGljZXM8L3RleHQ+PHBhdGggZD0iTTEzMCA1NSBMMjkwIDMwIE0xMzAgNjUgTDI5MCA5MCIgc3Ryb2tlPSIjNTU1IiBmaWxsPSJub25lIi8+PC9zdmc+Cg==",
+      "diagrams": "docs/design/F-FIX/S-151-diagrams/diagrams.md",
+      "c4Delta": {
+       "new": 2,
+       "changed": 1,
+       "removed": 0,
+       "added": [
+        "class:OverdueJob",
+        "collection:notices"
+       ],
+       "candidate": "docs/design/F-FIX/S-151.dsl"
+      },
+      "ledger": [
+       {
+        "class": "OverdueJob",
+        "principle / pattern": "idempotent writer",
+        "force in this story (ac or rule id)": "AC3",
+        "simpler alternative rejected, and why": "plain insert - a rerun duplicates notices",
+        "verification": "OverdueJobTest#rerunSendsOneNotice"
+       }
+      ],
+      "files": [
+       "../invoice-service - the job and the notices collection",
+       "../invoice-service/src/main/java/com/example/invoice/batch/OverdueJob.java - new"
+      ],
+      "confidence": 82,
+      "why": [
+       "one new pattern: an idempotent batch writer",
+       "notices is a new collection"
+      ],
+      "reviewerCheck": [
+       "section 4a, the upsert key"
+      ]
+     }
+    },
+    "designLenses": {
+     "state": "done",
+     "path": "docs/design/F-FIX/S-151-reviews",
+     "who": {
+      "kind": "agent",
+      "name": "design-review-lenses"
+     },
+     "metric": "4 lenses, 0 blocking",
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {
+      "lenses": [
+       {
+        "name": "data-integrity",
+        "verdict": "findings",
+        "blocking": 0,
+        "summary": "Blocking: 0",
+        "path": "docs/design/F-FIX/S-151-reviews/review-data-integrity.md"
+       },
+       {
+        "name": "domain-fidelity",
+        "verdict": "clear",
+        "blocking": 0,
+        "summary": "Blocking: 0",
+        "path": "docs/design/F-FIX/S-151-reviews/review-domain-fidelity.md"
+       },
+       {
+        "name": "rubric",
+        "verdict": "clear",
+        "blocking": 0,
+        "summary": "Blocking: 0",
+        "path": "docs/design/F-FIX/S-151-reviews/review-rubric.md"
+       },
+       {
+        "name": "security",
+        "verdict": "clear",
+        "blocking": 0,
+        "summary": "Blocking: 0",
+        "path": "docs/design/F-FIX/S-151-reviews/review-security.md"
+       }
+      ],
+      "freshContext": true
+     }
+    },
+    "gate2": {
+     "state": "done",
+     "path": null,
+     "who": {
+      "kind": "human",
+      "name": "Tech Lead"
+     },
+     "metric": "Approved · round 1",
+     "provenance": null,
+     "at": "2026-11-03T14:20:00Z",
+     "minutes": null,
+     "data": {
+      "decision": "Approved",
+      "rounds": 1,
+      "text": "2026-11-03 14:20 human Approved, confidence 82%. Check the notice is sent once per invoice."
+     }
+    },
+    "build": {
+     "state": "done",
+     "path": "docs/qa/F-FIX/S-151-diff-shape.json",
+     "who": {
+      "kind": "agent",
+      "name": "developer"
+     },
+     "metric": "+410 / -12 lines, 3 files",
+     "provenance": {
+      "agent": "developer",
+      "skills": [
+       "standards"
+      ],
+      "model": "fast (sonnet)",
+      "profile": [
+       "domain.md#invariants",
+       "stack-detected.md"
+      ],
+      "context": [
+       "docs/wiki/invoice-service/billing.md@5d6e7f8"
+      ],
+      "commit": "5d6e7f8",
+      "started": "2026-11-04T09:00:00Z",
+      "finished": "2026-11-04T11:30:00Z",
+      "tokens": 64100
+     },
+     "at": "2026-11-04T11:30:00Z",
+     "minutes": 150.0,
+     "data": {
+      "repos": [
+       {
+        "repo": "invoice-service",
+        "branch": "feature/F-FIX-S-151",
+        "commits": 3,
+        "commitList": [],
+        "linesAdded": 410,
+        "linesDeleted": 12,
+        "files": [
+         "src/main/java/com/example/invoice/batch/OverdueJob.java",
+         "src/main/java/com/example/invoice/batch/NoticeDoc.java",
+         "src/test/java/com/example/invoice/batch/OverdueJobTest.java"
+        ]
+       }
+      ],
+      "linesAdded": 410,
+      "linesDeleted": 12,
+      "estimate": "M",
+      "estimateLines": 800,
+      "newDependencies": [],
+      "breakingContract": [],
+      "yagniCount": 0,
+      "sensorLoops": 0,
+      "flags": [
+       "new types vs ledger: 1 extra (NoticeDoc) - flag"
+      ],
+      "devSummary": "Added OverdueJob and the notices collection. Sensor loops: 0. Run mvn -q verify."
+     }
+    },
+    "sensors": {
+     "state": "done",
+     "path": "docs/qa/F-FIX/S-151-sensors",
+     "who": {
+      "kind": "tool",
+      "name": "sensors"
+     },
+     "metric": "ArchUnit green",
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {
+      "tools": [
+       {
+        "tool": "archunit",
+        "result": "green",
+        "detail": "archunit.txt green (8 tests)",
+        "path": "docs/qa/F-FIX/S-151-sensors/archunit.txt",
+        "mandatory": true
+       },
+       {
+        "tool": "pmd",
+        "result": "green",
+        "detail": "pmd.xml: 0 violations",
+        "path": "docs/qa/F-FIX/S-151-sensors/pmd.xml",
+        "mandatory": false
+       },
+       {
+        "tool": "checkstyle",
+        "result": "green",
+        "detail": "checkstyle.xml: 0 errors",
+        "path": "docs/qa/F-FIX/S-151-sensors/checkstyle.xml",
+        "mandatory": false
+       }
+      ],
+      "mutation": {
+       "runs": [
+        {
+         "repo": "invoice-service",
+         "score": 0.86,
+         "scope": "changed lines",
+         "notRun": false,
+         "reason": null,
+         "path": "docs/qa/F-FIX/S-151-mutation.json"
+        }
+       ]
+      }
+     }
+    },
+    "qa": {
+     "state": "done",
+     "path": "docs/qa/F-FIX/S-151-test-report.md",
+     "who": {
+      "kind": "agent",
+      "name": "qa"
+     },
+     "metric": "PASS · 0 HIGH",
+     "provenance": {
+      "agent": "qa",
+      "skills": [
+       "review-lenses",
+       "data-check"
+      ],
+      "profile": [
+       "domain.md#severity-hints",
+       "project.md#test-env"
+      ],
+      "model": "fast (sonnet)",
+      "commit": "5d6e7f8",
+      "started": "2026-11-04T12:00:00Z",
+      "finished": "2026-11-04T12:45:00Z",
+      "tokens": 52300
+     },
+     "at": "2026-11-04T12:45:00Z",
+     "minutes": 45.0,
+     "data": {
+      "verdict": "PASS",
+      "conformance": "CONFORMS",
+      "craft": "0 high / 0 medium findings",
+      "domainFidelity": "1 rules touched, 1 faithful, 0 reinterpreted",
+      "acTable": [
+       {
+        "ac": "AC1",
+        "test": "OverdueJobTest#flagsAfter30Days",
+        "result": "PASS",
+        "evidence": "check_overdue.js p=2026-10, flagged=12"
+       },
+       {
+        "ac": "AC2",
+        "test": "OverdueJobTest#paidIsNotFlagged",
+        "result": "PASS",
+        "evidence": "flagged=0 of 5 paid"
+       },
+       {
+        "ac": "AC3",
+        "test": "OverdueJobTest#rerunSendsOneNotice",
+        "result": "PASS",
+        "evidence": "notices=12 after 2 runs"
+       }
+      ],
+      "dataChecks": [
+       "mongosh \"$TEST_URI\" scripts/qa/check_overdue.js - flagged=12, duplicates=0"
+      ],
+      "defects": [],
+      "humanFindings": "2026-11-05 09:30 Senior Engineer: none; the upsert key is right. Recommend approve.",
+      "triage": {
+       "HIGH": 0,
+       "MEDIUM": 0,
+       "LOW": 2,
+       "dismissed": 1
+      },
+      "findingsByLens": [
+       {
+        "finding": "F1",
+        "verdict": "low",
+        "lenses": "edge-case"
+       },
+       {
+        "finding": "F2",
+        "verdict": "low",
+        "lenses": "craft+conformance"
+       }
+      ],
+      "lenses": [
+       {
+        "name": "conformance",
+        "summary": "No high or medium findings.",
+        "path": "docs/qa/F-FIX/S-151-lens-conformance.md"
+       },
+       {
+        "name": "craft",
+        "summary": "No high or medium findings.",
+        "path": "docs/qa/F-FIX/S-151-lens-craft.md"
+       },
+       {
+        "name": "domain",
+        "summary": "No high or medium findings.",
+        "path": "docs/qa/F-FIX/S-151-lens-domain.md"
+       },
+       {
+        "name": "edge-case",
+        "summary": "No high or medium findings.",
+        "path": "docs/qa/F-FIX/S-151-lens-edge-case.md"
+       },
+       {
+        "name": "verification-gap",
+        "summary": "No high or medium findings.",
+        "path": "docs/qa/F-FIX/S-151-lens-verification-gap.md"
+       }
+      ],
+      "risk": {
+       "tier": "high",
+       "lenses": [
+        "edge-case",
+        "verification-gap",
+        "craft",
+        "conformance",
+        "domain"
+       ]
+      },
+      "security": {
+       "verdict": "FINDINGS",
+       "findings": {
+        "Low": 1
+       },
+       "path": "docs/qa/F-FIX/S-151-security-report.md"
+      },
+      "triagePath": "docs/qa/F-FIX/S-151-triage.md",
+      "reviewModel": "strong (opus)"
+     }
+    },
+    "confidence": {
+     "state": "done",
+     "path": "docs/qa/F-FIX/S-151-confidence.json",
+     "who": {
+      "kind": "tool",
+      "name": "baton confidence"
+     },
+     "metric": "score 86 · senior",
+     "provenance": null,
+     "at": "2026-11-04T13:10:00Z",
+     "minutes": null,
+     "data": {
+      "score": 86,
+      "raw": 86,
+      "lane": "senior",
+      "caps": [],
+      "signals": [
+       {
+        "name": "definition_of_ready",
+        "points": 10,
+        "max": 10,
+        "evidence": "Readiness 9/9"
+       },
+       {
+        "name": "design_review",
+        "points": 10,
+        "max": 10,
+        "evidence": "Approved in round 1"
+       },
+       {
+        "name": "change_size",
+        "points": 10,
+        "max": 10,
+        "evidence": "3 files, 422 lines within M"
+       },
+       {
+        "name": "sensors",
+        "points": 10,
+        "max": 10,
+        "evidence": "archunit, pmd, checkstyle green; 0 loops"
+       },
+       {
+        "name": "mutation",
+        "points": 10,
+        "max": 10,
+        "evidence": "0.86 on changed lines"
+       },
+       {
+        "name": "acceptance_coverage",
+        "points": 10,
+        "max": 10,
+        "evidence": "3 of 3 ACs have a passing test"
+       },
+       {
+        "name": "independent_review",
+        "points": 15,
+        "max": 15,
+        "evidence": "0 HIGH, 0 MEDIUM"
+       },
+       {
+        "name": "conformance_fidelity",
+        "points": 10,
+        "max": 10,
+        "evidence": "CONFORMS; 1 of 1 rules faithful"
+       },
+       {
+        "name": "blast_radius",
+        "points": 1,
+        "max": 15,
+        "evidence": "writes notices, a collection not yet profiled"
+       }
+      ],
+      "missing": [],
+      "evidence": "docs/qa/F-FIX/S-151-evidence.md"
+     }
+    },
+    "gate3": {
+     "state": "done",
+     "path": null,
+     "who": {
+      "kind": "human",
+      "name": "Tech Lead"
+     },
+     "metric": "Approved",
+     "provenance": null,
+     "at": "2026-11-05T09:30:00Z",
+     "minutes": null,
+     "data": {
+      "decision": "Approved",
+      "by": "Tech Lead",
+      "read": "the diff and the reports",
+      "lane": "senior",
+      "humanFindings": "2026-11-05 09:30 Senior Engineer: none; the upsert key is right. Recommend approve."
+     }
+    },
+    "docs": {
+     "state": "done",
+     "path": "docs/changes/F-FIX/S-151-change-note.md",
+     "who": {
+      "kind": "agent",
+      "name": "documentation"
+     },
+     "metric": "PR open",
+     "provenance": {
+      "agent": "documentation",
+      "skills": [
+       "change-note",
+       "doc-style"
+      ],
+      "commit": "5d6e7f8",
+      "started": "2026-11-05T10:00:00Z",
+      "finished": "2026-11-05T10:20:00Z"
+     },
+     "at": "2026-11-05T10:20:00Z",
+     "minutes": 20.0,
+     "data": {
+      "whatChanged": [
+       "**OverdueJob:** flags invoices 30 days past due every morning.",
+       "**notices:** new collection, one row per overdue invoice."
+      ],
+      "architecture": "+2 elements (overdueJob, notices), +3 relationships (overdueJob -> db, overdueJob -> notices, clerk -> notices).",
+      "adrs": [],
+      "pr": "https://example.invalid/pr/201",
+      "docsPr": null,
+      "metrics": [
+       {
+        "table": "Calibration",
+        "row": {
+         "story": "S-151",
+         "track": "full",
+         "confidence": "82",
+         "review": "approved",
+         "rounds": "1"
+        }
+       },
+       {
+        "table": "Delivery",
+        "row": {
+         "story": "S-151",
+         "lead time (d)": "3.1",
+         "cycle time (d)": "2.0",
+         "loops": "0",
+         "rounds": "1",
+         "confidence": "82",
+         "review": "approved",
+         "gate-3 score": "86",
+         "lane": "senior",
+         "tokens": "165800",
+         "minutes": "245"
+        }
+       }
+      ]
+     }
+    },
+    "merged": {
+     "state": "done",
+     "path": null,
+     "who": {
+      "kind": "tool",
+      "name": "git"
+     },
+     "metric": "merged",
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {
+      "pr": "https://example.invalid/pr/201",
+      "outcome": null
+     }
+    }
+   },
+   "timeline": [
+    {
+     "artefact": "feature",
+     "at": "2026-11-02T00:00:00Z",
+     "start": null,
+     "kind": "human"
+    },
+    {
+     "artefact": "stories",
+     "at": "2026-11-02T09:12:00Z",
+     "start": "2026-11-02T09:00:00Z",
+     "kind": "agent"
+    },
+    {
+     "artefact": "gate1",
+     "at": "2026-11-02T11:00:00Z",
+     "start": null,
+     "kind": "human"
+    },
+    {
+     "artefact": "design",
+     "at": "2026-11-03T10:40:00Z",
+     "start": "2026-11-03T10:00:00Z",
+     "kind": "agent"
+    },
+    {
+     "artefact": "gate2",
+     "at": "2026-11-03T14:20:00Z",
+     "start": null,
+     "kind": "human"
+    },
+    {
+     "artefact": "build",
+     "at": "2026-11-04T11:30:00Z",
+     "start": "2026-11-04T09:00:00Z",
+     "kind": "agent"
+    },
+    {
+     "artefact": "qa",
+     "at": "2026-11-04T12:45:00Z",
+     "start": "2026-11-04T12:00:00Z",
+     "kind": "agent"
+    },
+    {
+     "artefact": "confidence",
+     "at": "2026-11-04T13:10:00Z",
+     "start": null,
+     "kind": "tool"
+    },
+    {
+     "artefact": "gate3",
+     "at": "2026-11-05T09:30:00Z",
+     "start": null,
+     "kind": "human"
+    },
+    {
+     "artefact": "docs",
+     "at": "2026-11-05T10:20:00Z",
+     "start": "2026-11-05T10:00:00Z",
+     "kind": "agent"
+    }
+   ]
+  },
+  {
+   "id": "S-152",
+   "title": "Show the overdue list for a billing period",
+   "path": "docs/stories/F-FIX/S-152.md",
+   "jiraType": "Task",
+   "labels": [],
+   "track": "light",
+   "estimate": "S",
+   "state": "Designed",
+   "readiness": "9/9",
+   "loops": 1,
+   "branch": null,
+   "acs": [
+    {
+     "id": "AC1",
+     "text": "Given flagged invoices in invoices, when the clerk opens the list for a billing period, then only that period's overdue invoices show.",
+     "test": "InvoiceControllerTest#overdueForPeriod",
+     "result": "FAIL",
+     "evidence": "returned invoices of 2026-09 too"
+    },
+    {
+     "id": "AC2",
+     "text": "Given no overdue invoices, when the list opens, then it says there are none.",
+     "test": "InvoiceControllerTest#noneOverdue",
+     "result": "PASS",
+     "evidence": "empty list message"
+    }
+   ],
+   "clarifications": [],
+   "openQuestions": [
+    "(none)"
+   ],
+   "nodes": {
+    "feature": {
+     "state": "done",
+     "path": "docs/features/F-FIX-overdue-invoices.md",
+     "who": {
+      "kind": "human",
+      "name": "PO Pat Example"
+     },
+     "metric": "feature note",
+     "provenance": null,
+     "at": "2026-11-02T00:00:00Z",
+     "minutes": null,
+     "data": {
+      "summary": "Every morning each clerk sees the invoices that became overdue, and the customer gets a notice.",
+      "scope": [
+       "Overdue list for one billing period.",
+       "One notice per overdue invoice."
+      ],
+      "problem": "Clerks find overdue invoices by sorting a spreadsheet each morning. Late reminders cost goodwill.",
+      "noTechWords": true
+     }
+    },
+    "stories": {
+     "state": "done",
+     "path": "docs/stories/F-FIX/S-152.md",
+     "who": {
+      "kind": "agent",
+      "name": "story-drafter"
+     },
+     "metric": "2 stories",
+     "provenance": {
+      "agent": "story-drafter",
+      "skills": [
+       "story-writing"
+      ],
+      "profile": [
+       "project.md#personas"
+      ],
+      "started": "2026-11-02T09:12:00Z",
+      "finished": "2026-11-02T09:20:00Z"
+     },
+     "at": "2026-11-02T09:20:00Z",
+     "minutes": 8.0,
+     "data": {
+      "stories": [
+       {
+        "id": "S-151",
+        "title": "Flag overdue invoices every morning",
+        "jiraType": "Story",
+        "labels": "batch-job",
+        "track": "full",
+        "estimate": "M",
+        "state": "Done",
+        "readiness": "9/9",
+        "path": "docs/stories/F-FIX/S-151.md"
+       },
+       {
+        "id": "S-152",
+        "title": "Show the overdue list for a billing period",
+        "jiraType": "Task",
+        "labels": "none",
+        "track": "light",
+        "estimate": "S",
+        "state": "Designed",
+        "readiness": "9/9",
+        "path": "docs/stories/F-FIX/S-152.md"
+       }
+      ]
+     }
+    },
+    "gate1": {
+     "state": "done",
+     "path": "docs/stories/F-FIX/S-152.md",
+     "who": {
+      "kind": "human",
+      "name": "PO"
+     },
+     "metric": "Ready",
+     "provenance": null,
+     "at": "2026-11-02T11:05:00Z",
+     "minutes": null,
+     "data": {
+      "decision": "Ready",
+      "by": "PO",
+      "readiness": "2026-11-02 11:05 checklist\nScore: 9/9"
+     }
+    },
+    "design": {
+     "state": "done",
+     "path": "docs/design/F-FIX/S-152-design.md",
+     "who": {
+      "kind": "agent",
+      "name": "architect"
+     },
+     "metric": "confidence 88%",
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {
+      "track": "light",
+      "revision": 2,
+      "challenge": {
+       "strawman": null,
+       "failures": null,
+       "chosen": null
+      },
+      "change": "Add GET overdue invoices to InvoiceController; the query filters on billingPeriod first (revision 2, after QA loop 1). Rules touched: none",
+      "rulesTouched": "none",
+      "flowSvg": null,
+      "diagrams": null,
+      "c4Delta": null,
+      "ledger": [],
+      "files": [],
+      "confidence": 88,
+      "why": [
+       "reuses the invoice list pattern."
+      ],
+      "reviewerCheck": [
+       "the period filter."
+      ]
+     }
+    },
+    "designLenses": {
+     "state": "not_produced",
+     "path": null,
+     "who": {
+      "kind": "agent",
+      "name": "design-review-lenses"
+     },
+     "metric": null,
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {}
+    },
+    "gate2": {
+     "state": "in_progress",
+     "path": null,
+     "who": {
+      "kind": "human",
+      "name": "Tech Lead"
+     },
+     "metric": "Changes requested · round 2",
+     "provenance": null,
+     "at": "2026-11-05T11:30:00Z",
+     "minutes": null,
+     "data": {
+      "decision": "Changes requested",
+      "rounds": 2,
+      "text": "2026-11-03 15:00 auto-passed, confidence 88%\n2026-11-05 11:30 human changes requested (round 2): QA found the query has no billingPeriod key; redesign the filter."
+     }
+    },
+    "build": {
+     "state": "done",
+     "path": "docs/qa/F-FIX/S-152-diff-shape.json",
+     "who": {
+      "kind": "agent",
+      "name": "developer"
+     },
+     "metric": "+140 / -4 lines, 1 file",
+     "provenance": {
+      "agent": "developer",
+      "skills": [
+       "standards"
+      ],
+      "profile": [
+       "stack-detected.md"
+      ],
+      "commit": "9c8b7a6",
+      "started": "2026-11-05T09:00:00Z",
+      "finished": "2026-11-05T10:00:00Z"
+     },
+     "at": "2026-11-05T10:00:00Z",
+     "minutes": 60.0,
+     "data": {
+      "repos": [
+       {
+        "repo": "invoice-service",
+        "branch": "feature/F-FIX-S-152",
+        "commits": 2,
+        "commitList": [],
+        "linesAdded": 140,
+        "linesDeleted": 4,
+        "files": [
+         "src/main/java/com/example/invoice/api/InvoiceController.java"
+        ]
+       }
+      ],
+      "linesAdded": 140,
+      "linesDeleted": 4,
+      "estimate": "S",
+      "estimateLines": 300,
+      "newDependencies": [],
+      "breakingContract": [],
+      "yagniCount": 0,
+      "sensorLoops": 1,
+      "flags": [
+       "query without billingPeriod in InvoiceController - flag"
+      ],
+      "devSummary": "Added the overdue list endpoint. Sensor loops: 1."
+     }
+    },
+    "sensors": {
+     "state": "failed",
+     "path": "docs/qa/F-FIX/S-152-sensors",
+     "who": {
+      "kind": "tool",
+      "name": "sensors"
+     },
+     "metric": "ArchUnit green, pmd red",
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {
+      "tools": [
+       {
+        "tool": "archunit",
+        "result": "green",
+        "detail": "archunit.txt green (8 tests)",
+        "path": "docs/qa/F-FIX/S-152-sensors/archunit.txt",
+        "mandatory": true
+       },
+       {
+        "tool": "pmd",
+        "result": "red",
+        "detail": "pmd.xml: 1 violations",
+        "path": "docs/qa/F-FIX/S-152-sensors/pmd.xml",
+        "mandatory": false
+       }
+      ],
+      "mutation": null
+     }
+    },
+    "qa": {
+     "state": "failed",
+     "path": "docs/qa/F-FIX/S-152-test-report.md",
+     "who": {
+      "kind": "agent",
+      "name": "qa"
+     },
+     "metric": "FAIL · 1 HIGH",
+     "provenance": {
+      "agent": "qa",
+      "skills": [
+       "review-lenses",
+       "data-check"
+      ],
+      "profile": [
+       "project.md#test-env"
+      ],
+      "commit": "9c8b7a6",
+      "started": "2026-11-05T10:30:00Z",
+      "finished": "2026-11-05T11:00:00Z"
+     },
+     "at": "2026-11-05T11:00:00Z",
+     "minutes": 30.0,
+     "data": {
+      "verdict": "FAIL",
+      "conformance": "CONFORMS",
+      "craft": "not run (low risk)",
+      "domainFidelity": "not run (low risk)",
+      "acTable": [
+       {
+        "ac": "AC1",
+        "test": "InvoiceControllerTest#overdueForPeriod",
+        "result": "FAIL",
+        "evidence": "returned invoices of 2026-09 too"
+       },
+       {
+        "ac": "AC2",
+        "test": "InvoiceControllerTest#noneOverdue",
+        "result": "PASS",
+        "evidence": "empty list message"
+       }
+      ],
+      "dataChecks": [
+       "mongosh \"$TEST_URI\" scripts/qa/check_overdue.js p=2026-10 - 3 rows from another period"
+      ],
+      "defects": [
+       "D1: query has no billingPeriod key, InvoiceController.java:58, open the list for 2026-10, breaks AC1"
+      ],
+      "humanFindings": null,
+      "triage": {
+       "HIGH": 1,
+       "MEDIUM": 0,
+       "LOW": 0,
+       "dismissed": 0
+      },
+      "findingsByLens": [
+       {
+        "finding": "F1",
+        "verdict": "high",
+        "lenses": "verification-gap"
+       }
+      ],
+      "lenses": [
+       {
+        "name": "conformance",
+        "summary": "Matches the light design.",
+        "path": "docs/qa/F-FIX/S-152-lens-conformance.md"
+       },
+       {
+        "name": "verification-gap",
+        "summary": "AC1 test does not check the billing period filter.",
+        "path": "docs/qa/F-FIX/S-152-lens-verification-gap.md"
+       }
+      ],
+      "risk": {
+       "tier": "low",
+       "lenses": [
+        "conformance",
+        "verification-gap"
+       ]
+      },
+      "security": null,
+      "triagePath": "docs/qa/F-FIX/S-152-triage.md",
+      "reviewModel": null
+     }
+    },
+    "confidence": {
+     "state": "not_produced",
+     "path": null,
+     "who": {
+      "kind": "tool",
+      "name": "baton confidence"
+     },
+     "metric": null,
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {}
+    },
+    "gate3": {
+     "state": "not_produced",
+     "path": null,
+     "who": {
+      "kind": "human",
+      "name": "Tech Lead"
+     },
+     "metric": null,
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {}
+    },
+    "docs": {
+     "state": "not_produced",
+     "path": null,
+     "who": {
+      "kind": "agent",
+      "name": "documentation"
+     },
+     "metric": null,
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {}
+    },
+    "merged": {
+     "state": "not_produced",
+     "path": null,
+     "who": {
+      "kind": "tool",
+      "name": "git"
+     },
+     "metric": null,
+     "provenance": null,
+     "at": null,
+     "minutes": null,
+     "data": {}
+    }
+   },
+   "timeline": [
+    {
+     "artefact": "feature",
+     "at": "2026-11-02T00:00:00Z",
+     "start": null,
+     "kind": "human"
+    },
+    {
+     "artefact": "stories",
+     "at": "2026-11-02T09:20:00Z",
+     "start": "2026-11-02T09:12:00Z",
+     "kind": "agent"
+    },
+    {
+     "artefact": "gate1",
+     "at": "2026-11-02T11:05:00Z",
+     "start": null,
+     "kind": "human"
+    },
+    {
+     "artefact": "build",
+     "at": "2026-11-05T10:00:00Z",
+     "start": "2026-11-05T09:00:00Z",
+     "kind": "agent"
+    },
+    {
+     "artefact": "qa",
+     "at": "2026-11-05T11:00:00Z",
+     "start": "2026-11-05T10:30:00Z",
+     "kind": "agent"
+    },
+    {
+     "artefact": "gate2",
+     "at": "2026-11-05T11:30:00Z",
+     "start": null,
+     "kind": "human"
+    }
+   ]
+  }
+ ],
+ "knowledge": {
+  "domainLines": [
+   {
+    "id": null,
+    "text": "An invoice is overdue 30 days after its due date when it is unpaid.",
+    "story": "S-151",
+    "approvedBy": "PO",
+    "inDomain": true
+   }
+  ],
+  "rules": [
+   {
+    "name": "Overdue queries name billingPeriod",
+    "kind": "ArchUnit",
+    "repo": "invoice-service",
+    "incident": "S-152 QA: query without the period key",
+    "added": "2026-11-05"
+   }
+  ],
+  "architecture": {
+   "before": {
+    "elements": 4,
+    "relationships": 2
+   },
+   "after": {
+    "elements": 6,
+    "relationships": 5
+   },
+   "addedElements": 2,
+   "addedRelationships": 3,
+   "removed": 0,
+   "changed": 0,
+   "added": [
+    "overdueJob",
+    "notices",
+    "overdueJob -> db \"reads invoices\"",
+    "overdueJob -> notices \"writes notices\"",
+    "clerk -> notices \"reads notices\""
+   ],
+   "changelog": "docs/architecture/CHANGELOG.md",
+   "lines": [
+    {
+     "story": "S-151",
+     "line": "+2 elements +3 relationships ~0 changed 0 removed"
+    }
+   ],
+   "workspace": "docs/architecture/workspace.dsl"
+  }
+ }
+}

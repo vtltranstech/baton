@@ -1,0 +1,10 @@
+# Paths where gate-3 confidence is capped. Globs match diff file paths; lowest cap wins.
+zones:
+  - name: outbound-file
+    paths: ["**/outbound/**"]
+    reason: a file the ledger consumes
+    cap: 50
+  - name: money
+    paths: ["**/*Total*"]
+    reason: money fields
+    cap: 50

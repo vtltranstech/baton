@@ -1,0 +1,19 @@
+generated: 2026-11-01T10:00:00Z
+repos:
+  - repo: shop-service
+    commit: fx00001
+    edges:
+      - kind: WRITES_COLLECTION
+        from: class:com.example.shop.billing.InvoiceStore
+        to: collection:invoices
+        provenance: {file: src/main/java/com/example/shop/billing/InvoiceStore.java, line: 14, extractor: mongo-template-literal}
+      - kind: READS_COLLECTION
+        from: class:com.example.shop.pricing.PriceRepository
+        to: collection:prices
+        provenance: {file: src/main/java/com/example/shop/pricing/PriceRepository.java, line: 7, extractor: spring-data-generic}
+      - kind: CALLS_ENDPOINT
+        from: class:com.example.shop.pricing.RateClient
+        to: "endpoint:GET ${rates.base-url}/rates"
+        provenance: {file: src/main/java/com/example/shop/pricing/RateClient.java, line: 14, extractor: rest-client-base-url}
+    unresolved:
+      - "endpoint:GET ${rates.base-url}/rates"

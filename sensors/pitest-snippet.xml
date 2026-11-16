@@ -1,0 +1,15 @@
+<!-- Add to pom.xml <build><plugins>. PIT is a confidence signal, not a gate: no mutationThreshold, and no execution is
+     bound to the lifecycle, so `mvn verify` does not run it. `baton mutation` runs it on the changed classes only and
+     passes -DtargetClasses and -DtargetTests. Versions proven on Java 17 and 21 by fixtures/sample-java-repo. -->
+<plugin>
+  <groupId>org.pitest</groupId><artifactId>pitest-maven</artifactId><version>1.30.1</version>
+  <dependencies>
+    <dependency><groupId>org.pitest</groupId><artifactId>pitest-junit5-plugin</artifactId><version>1.2.3</version></dependency>
+  </dependencies>
+  <configuration>
+    <excludedTestClasses><param>*ArchitectureTest</param></excludedTestClasses>
+    <outputFormats><param>XML</param></outputFormats>
+    <timestampedReports>false</timestampedReports>
+    <failWhenNoMutations>false</failWhenNoMutations>
+  </configuration>
+</plugin>

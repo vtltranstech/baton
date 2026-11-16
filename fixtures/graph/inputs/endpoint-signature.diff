@@ -1,0 +1,7 @@
+diff --git a/src/main/java/com/sample/account/AccountController.java b/src/main/java/com/sample/account/AccountController.java
+index 1111111..2222222 100644
+--- a/src/main/java/com/sample/account/AccountController.java
++++ b/src/main/java/com/sample/account/AccountController.java
+@@ -32 +32 @@ public class AccountController {
+-    public AccountView get(@PathVariable String id) {
++    public AccountView get(@PathVariable String id, @RequestParam String period) {

@@ -1,0 +1,76 @@
+# Hand-written against schemas/dependencies.json; see fixtures/graph/README.md
+generated: 2026-11-01T10:00:00Z
+repos:
+  - repo: ledger-loader
+    commit: a1b2c3d
+    edges:
+      - kind: WRITES_COLLECTION
+        from: class:com.sample.loader.AccountDoc
+        to: "collection:accounts"
+        provenance: {file: src/main/java/com/sample/loader/AccountDoc.java, line: 9, extractor: document-annotation}
+      - kind: WRITES_COLLECTION
+        from: class:com.sample.loader.AccountWriter
+        to: "collection:accounts"
+        provenance: {file: src/main/java/com/sample/loader/AccountWriter.java, line: 27, extractor: mongo-template-literal}
+      - kind: PUBLISHES
+        from: class:com.sample.loader.AccountEventPublisher
+        to: "topic:account.events"
+        provenance: {file: src/main/java/com/sample/loader/AccountEventPublisher.java, line: 33, extractor: kafka-template}
+      - kind: PUBLISHES
+        from: class:com.sample.loader.SettlementSender
+        to: "queue:SETTLEMENT.IN"
+        provenance: {file: src/main/java/com/sample/loader/SettlementSender.java, line: 41, extractor: jms-template}
+      - kind: WRITES_FILE
+        from: class:com.sample.loader.AccountExtractWriter
+        to: "file:outbound/accounts-*.csv"
+        provenance: {file: src/main/java/com/sample/loader/AccountExtractWriter.java, line: 19, extractor: flatfile-writer}
+      - kind: CONSUMES
+        from: class:com.sample.loader.StatementReadyListener
+        to: "topic:statement.ready"
+        provenance: {file: src/main/java/com/sample/loader/StatementReadyListener.java, line: 12, extractor: kafka-listener}
+      - kind: RUNS_JOB
+        from: class:com.sample.loader.LoaderJobConfig
+        to: "job:nightlyAccountLoad"
+        provenance: {file: src/main/java/com/sample/loader/LoaderJobConfig.java, line: 16, extractor: job-builder}
+  - repo: account-service
+    commit: b2c3d4e
+    edges:
+      - kind: READS_COLLECTION
+        from: class:com.sample.account.AccountRepository
+        to: "collection:accounts"
+        provenance: {file: src/main/java/com/sample/account/AccountRepository.java, line: 14, extractor: spring-data-generic}
+      - kind: CONSUMES
+        from: class:com.sample.account.AccountEventListener
+        to: "topic:account.events"
+        provenance: {file: src/main/java/com/sample/account/AccountEventListener.java, line: 22, extractor: kafka-listener}
+      - kind: EXPOSES
+        from: class:com.sample.account.AccountController
+        to: "endpoint:GET /api/v1/accounts/{id}"
+        provenance: {file: src/main/java/com/sample/account/AccountController.java, line: 31, extractor: request-mapping}
+  - repo: statement-batch
+    commit: c3d4e5f
+    edges:
+      - kind: READS_COLLECTION
+        from: class:com.sample.statement.AccountReader
+        to: "collection:accounts"
+        provenance: {file: src/main/java/com/sample/statement/AccountReader.java, line: 41, extractor: mongo-template-literal}
+      - kind: READS_COLLECTION
+        from: class:com.sample.statement.AccountReader
+        to: "collection:accounts"
+        provenance: {file: src/main/java/com/sample/statement/AccountReader.java, line: 58, extractor: mongo-template-literal}
+      - kind: CONSUMES
+        from: class:com.sample.statement.StatementListener
+        to: "topic:account.events"
+        provenance: {file: src/main/java/com/sample/statement/StatementListener.java, line: 18, extractor: kafka-listener}
+      - kind: READS_FILE
+        from: class:com.sample.statement.AccountExtractReader
+        to: "file:outbound/accounts-*.csv"
+        provenance: {file: src/main/java/com/sample/statement/AccountExtractReader.java, line: 25, extractor: flatfile-reader}
+      - kind: CALLS_ENDPOINT
+        from: class:com.sample.statement.AccountClient
+        to: "endpoint:GET /api/v1/accounts/{id}"
+        provenance: {file: src/main/java/com/sample/statement/AccountClient.java, line: 52, extractor: rest-client-base-url}
+      - kind: PUBLISHES
+        from: class:com.sample.statement.StatementReadyPublisher
+        to: "topic:statement.ready"
+        provenance: {file: src/main/java/com/sample/statement/StatementReadyPublisher.java, line: 37, extractor: kafka-template}

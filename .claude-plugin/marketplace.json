@@ -1,0 +1,12 @@
+{
+  "name": "lob",
+  "description": "Line-of-business marketplace: the BATON framework",
+  "owner": {"name": "Siva"},
+  "plugins": [
+    {
+      "name": "baton",
+      "source": "./",
+      "description": "BATON: agentic delivery for Java/React/Mongo teams: 9 agents, 3 human gates, hooks as law, computed gate-3 confidence."
+    }
+  ]
+}

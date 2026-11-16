@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<ruleset name="sample-project-sensors" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+  <description>Project invariant: periodKey is the period key of this repo and is in every query.</description>
+  <rule name="QueryWithoutPeriodKey" language="java" message="Query without the period key. REMEDIATION: add Criteria .and(&quot;periodKey&quot;).is(periodKey) to this query" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+    <description>Every method that builds a Mongo query names the period key.</description>
+    <priority>2</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//MethodDeclaration[.//ConstructorCall[ClassType[@SimpleName='Query']] or .//MethodCall[@MethodName='where']]
+  [not(.//StringLiteral[@ConstValue='periodKey'])]
+]]></value></property></properties>
+  </rule>
+</ruleset>

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "confidence-weights",
+  "type": "object",
+  "required": [
+    "version",
+    "signals",
+    "caps",
+    "policy",
+    "thresholds"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
+    "signals": {
+      "type": "object",
+      "required": [
+        "definition_of_ready",
+        "design_review",
+        "change_size",
+        "sensors",
+        "mutation",
+        "acceptance_coverage",
+        "independent_review",
+        "conformance_fidelity",
+        "blast_radius"
+      ],
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      }
+    },
+    "caps": {
+      "type": "object",
+      "required": [
+        "risk_zone",
+        "breaking_contract",
+        "unprofiled_write",
+        "unknown_edges",
+        "new_dependency"
+      ],
+      "additionalProperties": {
+        "type": "integer"
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "fast_lane_min",
+        "senior_min"
+      ]
+    },
+    "thresholds": {
+      "type": "object"
+    }
+  }
+}

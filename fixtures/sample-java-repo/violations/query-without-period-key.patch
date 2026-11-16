@@ -1,0 +1,16 @@
+diff --git a/src/main/java/com/example/sample/adapters/repository/FeeAccrualStore.java b/src/main/java/com/example/sample/adapters/repository/FeeAccrualStore.java
+index 3cbfb83..d109ec4 100644
+--- a/src/main/java/com/example/sample/adapters/repository/FeeAccrualStore.java
++++ b/src/main/java/com/example/sample/adapters/repository/FeeAccrualStore.java
+@@ -23,6 +23,11 @@ public class FeeAccrualStore implements FeeAccrualPort {
+         return mongo.find(query, FeeAccrualDoc.class, "fee_accruals");
+     }
+ 
++    public List<FeeAccrualDoc> findAllForAccount(String accountRef) {
++        Query query = new Query(Criteria.where("accountRef").is(accountRef));
++        return mongo.find(query, FeeAccrualDoc.class, "fee_accruals");
++    }
++
+     @Override
+     public void save(FeeAccrualDoc accrual) {
+         mongo.insert(accrual, "fee_accruals");

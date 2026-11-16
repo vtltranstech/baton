@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "impact",
+  "type": "object",
+  "required": [
+    "sourceRepo",
+    "changedSymbols",
+    "impacted",
+    "unknownEdges"
+  ],
+  "properties": {
+    "sourceRepo": {
+      "type": "string"
+    },
+    "changedSymbols": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "impacted": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "repo",
+          "via",
+          "file",
+          "lines",
+          "breaking"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string"
+          },
+          "via": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "string"
+          },
+          "team": {
+            "type": "string"
+          },
+          "breaking": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "unknownEdges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

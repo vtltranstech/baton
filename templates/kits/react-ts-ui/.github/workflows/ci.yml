@@ -1,0 +1,41 @@
+# Same-bar pipeline: every change, from a person or an agent, runs exactly these stages. There is no agent-only lane,
+# no stage behind a condition, and no flag that skips lint, typecheck or tests.
+# REQUIRED: branch protection on the default branch - require this workflow's `ci` check to pass and a human
+# review before merge; no direct pushes. CI without branch protection is advice, not a gate.
+# Actions are pinned by major version; packages resolve only through the org registry (.npmrc).
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest # <org runner label>
+    env:
+      ORG_NPM_REGISTRY: ${{ vars.ORG_NPM_REGISTRY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: ESLint (sensors)
+        run: npm run lint
+
+      - name: Typecheck (TypeScript strict)
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build

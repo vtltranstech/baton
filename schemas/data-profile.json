@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data-profile",
+  "type": "object",
+  "required": [
+    "collection",
+    "sampledAt",
+    "sampleSize",
+    "docCount",
+    "fields",
+    "indexes",
+    "unprofiled"
+  ],
+  "properties": {
+    "collection": {
+      "type": "string"
+    },
+    "sampledAt": {
+      "type": "string"
+    },
+    "sampleSize": {
+      "type": "integer"
+    },
+    "docCount": {
+      "type": "integer"
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "presence": {
+            "type": "number"
+          },
+          "types": {
+            "type": "object"
+          },
+          "cardinality": {
+            "type": "integer"
+          },
+          "arrayLen": {
+            "type": "object"
+          },
+          "masked": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "sizeBytes": {
+      "type": "object"
+    },
+    "indexes": {
+      "type": "array"
+    },
+    "samples": {
+      "type": "array"
+    },
+    "drift": {
+      "type": "object"
+    },
+    "unprofiled": {
+      "type": "boolean"
+    }
+  }
+}

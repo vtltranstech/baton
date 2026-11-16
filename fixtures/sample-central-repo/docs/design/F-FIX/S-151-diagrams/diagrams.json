@@ -1,0 +1,11 @@
+{
+  "story": "S-151",
+  "source": "docs/design/F-FIX/S-151-change.yaml",
+  "touchPoints": [
+    {"element": "class:OverdueJob", "status": "new", "repo": "invoice-service", "file": "src/main/java/com/example/invoice/batch/OverdueJob.java"},
+    {"element": "collection:notices", "status": "new", "repo": "invoice-service"},
+    {"element": "collection:invoices", "status": "changed", "repo": "invoice-service"}
+  ],
+  "impacted": [],
+  "entries": ["job:overdueJob"]
+}

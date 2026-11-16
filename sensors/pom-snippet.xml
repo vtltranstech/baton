@@ -1,0 +1,30 @@
+<!-- Install: copy checkstyle.xml and pmd-ruleset.xml to config/sensors/ in the service repo, copy ArchitectureTest.java
+     to src/test/java/<root package>/, then add this to pom.xml. Fails the build on the thresholds; run `mvn -q verify`.
+     Proven by fixtures/sample-java-repo/pom.xml, which uses exactly these settings. -->
+<!-- <build><plugins>: -->
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId><artifactId>maven-pmd-plugin</artifactId><version>3.28.0</version>
+  <configuration>
+    <rulesets>
+      <ruleset>${project.basedir}/config/sensors/pmd-ruleset.xml</ruleset>
+      <!-- Project invariants, e.g. a period-key rule (profile/sensors/pmd-extra.xml): -->
+      <!-- <ruleset>${project.basedir}/config/sensors/pmd-extra.xml</ruleset> -->
+    </rulesets>
+    <failOnViolation>true</failOnViolation><printFailingErrors>true</printFailingErrors>
+    <minimumTokens>30</minimumTokens> <!-- CPD duplication threshold -->
+    <linkXRef>false</linkXRef>
+  </configuration>
+  <executions><execution><goals><goal>check</goal><goal>cpd-check</goal></goals></execution></executions>
+</plugin>
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId><artifactId>maven-checkstyle-plugin</artifactId><version>3.6.0</version>
+  <configuration>
+    <configLocation>${project.basedir}/config/sensors/checkstyle.xml</configLocation>
+    <failOnViolation>true</failOnViolation><violationSeverity>error</violationSeverity>
+    <consoleOutput>true</consoleOutput>
+  </configuration>
+  <executions><execution><goals><goal>check</goal></goals></execution></executions>
+</plugin>
+<!-- pitest: see pitest-snippet.xml -->
+<!-- <dependencies>: ArchUnit is a test dependency only; ArchitectureTest.java runs with surefire. -->
+<dependency><groupId>com.tngtech.archunit</groupId><artifactId>archunit-junit5</artifactId><version>1.4.1</version><scope>test</scope></dependency>

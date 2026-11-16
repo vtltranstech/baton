@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "mutation",
+  "type": "object",
+  "required": [
+    "repo",
+    "diffRef",
+    "changedClasses",
+    "notRun"
+  ],
+  "properties": {
+    "repo": {
+      "type": "string"
+    },
+    "diffRef": {
+      "type": "string"
+    },
+    "changedClasses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "killed": {
+      "type": "integer"
+    },
+    "survived": {
+      "type": "integer"
+    },
+    "noCoverage": {
+      "type": "integer"
+    },
+    "notRun": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "changed lines",
+        "changed classes"
+      ]
+    },
+    "classScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

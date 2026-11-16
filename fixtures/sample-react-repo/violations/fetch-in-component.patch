@@ -1,0 +1,17 @@
+diff --git a/src/components/FeeTotal.tsx b/src/components/FeeTotal.tsx
+new file mode 100644
+index 0000000..7e0f67c
+--- /dev/null
++++ b/src/components/FeeTotal.tsx
+@@ -0,0 +1,11 @@
++import { useEffect, useState } from "react";
++
++export function FeeTotal({ accountRef }: { accountRef: string }) {
++  const [total, setTotal] = useState("");
++  useEffect(() => {
++    fetch(`/api/v1/fees/${accountRef}`)
++      .then((response) => response.text())
++      .then(setTotal);
++  }, [accountRef]);
++  return <p>{total}</p>;
++}

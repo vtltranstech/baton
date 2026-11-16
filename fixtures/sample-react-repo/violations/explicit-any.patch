@@ -1,0 +1,9 @@
+diff --git a/src/components/FeeBadge.tsx b/src/components/FeeBadge.tsx
+new file mode 100644
+index 0000000..8ef0cf7
+--- /dev/null
++++ b/src/components/FeeBadge.tsx
+@@ -0,0 +1,3 @@
++export function FeeBadge({ fee }: { fee: any }) {
++  return <span>{fee.total}</span>;
++}
