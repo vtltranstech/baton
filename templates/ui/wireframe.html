@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- Lo-fi wireframe template (contracts/ui-stories.md section 9). Copy to
+     docs/design/<F>/<S>-wireframe/option-<n>.html and copy wireframe.css (from .claude/templates/ui/) next to
+     it, so the folder opens in a browser on its own. Compose only these primitives:
+       data-region="<region>" data-component="<component from the spec>"   one per spec region
+       data-field="<field>"     a .field with a .label (the spec label) and an empty .value
+       data-action="<action>"   a button with the spec label
+       data-state="<state>"     loading, empty, error, partial, no-permission: what each shows
+       data-changed             on a region a light-track delta changes
+     No colours, fonts, images or scripts; labels are glossary words or field names. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S-nnn option 1: screen-id</title>
+  <link rel="stylesheet" href="wireframe.css">
+</head>
+<body>
+  <main class="screen">
+    <p class="title">Screen title from the persona's task</p>
+
+    <section data-region="header" data-component="PageHeader">
+      <div class="row">
+        <div class="col field" data-field="customerName"><span class="label">Customer</span><span class="value"></span></div>
+        <div class="col field" data-field="billingPeriod"><span class="label">Billing period</span><span class="value"></span></div>
+      </div>
+    </section>
+
+    <section data-region="lines" data-component="DataTable">
+      <table>
+        <caption class="small">Invoice lines</caption>
+        <thead><tr><th scope="col" data-field="description">Description</th><th scope="col" data-field="amount">Amount</th></tr></thead>
+        <tbody><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></tbody>
+      </table>
+    </section>
+
+    <section data-region="actions" data-component="ActionBar">
+      <button type="button" data-action="send">Send</button>
+    </section>
+
+    <section data-region="states" data-component="StatePanel">
+      <div class="states">
+        <div data-state="loading">skeleton rows; the header stays</div>
+        <div data-state="empty">No lines for this period, and what to do next</div>
+        <div data-state="error">what went wrong and Retry; never a stack trace</div>
+        <div data-state="partial">unresolved lines flagged; total hidden</div>
+        <div data-state="no-permission">why, and who to ask; no data</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

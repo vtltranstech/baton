@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S-120 option 2: invoice-summary</title>
+<link rel="stylesheet" href="wireframe.css">
+</head>
+<body>
+<main class="screen">
+<p class="title">Invoice</p>
+<section data-region="header" data-component="PageHeader">
+  <div class="row">
+    <div class="col field" data-field="customerName"><span class="label">Customer</span><span class="value"></span></div>
+    <div class="col field" data-field="billingPeriod"><span class="label">Billing period</span><span class="value"></span></div>
+  </div>
+</section>
+<section data-region="totals" data-component="InvoiceTotals">
+  <div class="field" data-field="total"><span class="label">Total</span><span class="value"></span></div>
+  <div class="field" data-field="status"><span class="label">Status</span><span class="value"></span></div>
+</section>
+<section data-region="actions" data-component="ActionBar">
+  <button type="button" data-action="send">Send</button>
+</section>
+<section data-region="lines" data-component="DataTable">
+  <table>
+    <caption class="small">Invoice lines</caption>
+    <thead><tr><th scope="col" data-field="description">Description</th><th scope="col" data-field="amount">Amount</th></tr></thead>
+    <tbody><tr><td>&nbsp;</td><td>&nbsp;</td></tr></tbody>
+  </table>
+</section>
+<div class="states">
+  <div data-state="loading">skeleton rows; the header stays</div>
+  <div data-state="empty">No lines for this period, and how to add one</div>
+  <div data-state="error">what went wrong, and Retry</div>
+  <div data-state="partial">unresolved lines flagged; total hidden</div>
+  <div data-state="no-permission">why, and who to ask</div>
+</div>
+</main>
+</body>
+</html>

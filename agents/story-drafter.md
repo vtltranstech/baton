@@ -63,7 +63,7 @@ As a <role>, I want <capability> so that <outcome>.
 
 Triage rules:
 - Jira-Type follows the nature of the work: a defect is a Bug, an internal change with no user-visible behaviour is a Task, new or changed behaviour is a Story, an investigation is a Spike.
-- Add labels only from the `triage` skill: `new-api`, `data-model`, `batch-job`, the profile's extra labels, `multi-repo` when the story plainly needs them; `quick-fix` only for a one-module change with no data impact; never `hotfix` (only a human adds that).
+- Add labels only from the `triage` skill: `new-api`, `data-model`, `batch-job`, the profile's extra labels, `multi-repo` when the story plainly needs them; `ui` when the story adds or changes a screen (its wireframe goes to the PO at gate 2a); `quick-fix` only for a one-module change with no data impact; never `hotfix` (only a human adds that).
 - Derive Track from type + labels per the `triage` skill. When in doubt, full.
 - If Jira is connected (a `jira` tool is available), create the issue with that type and those labels, put the key in `Jira-Key:`, and link the story file path in the issue description. If not, leave `Jira-Key:` blank; a human or the release agent will sync later.
 

@@ -1,0 +1,11 @@
+{
+  "_comment": "Keep equal to profile/project.md ui.library.import and ui.library.forbid (contracts/ui-stories.md section 4).",
+  "import": [
+    "@org/ui"
+  ],
+  "forbid": [
+    "@mui/*",
+    "@mui/material",
+    "antd"
+  ]
+}

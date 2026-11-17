@@ -7,8 +7,8 @@ model: inherit
 ## Blueprint
 - Trigger: gate 3 Approved, or an accepted spike
 - Input: docs/stories/<F>/<S>.md; docs/design/<F>/<S>-design.md; docs/design/<F>/<S>.dsl; docs/qa/<F>/<S>-evidence.md; docs/architecture/workspace.dsl
-- Action: change note; promote the candidate workspace with its stamps and the CHANGELOG line; refresh the wiki and the diagrams; list the areas gone stale; publish the people pages when a Confluence connector is present; archive the feature on its last story
-- Output: docs/changes/<F>/<S>-change-note.md; docs/architecture/workspace.dsl; CHANGELOG.md; docs/trace/<F>.html
+- Action: change note; promote the candidate workspace with its stamps and the CHANGELOG line; promote a `ui` story's screen of record; refresh the wiki and the diagrams; list the areas gone stale; publish the people pages when a Confluence connector is present; archive the feature on its last story
+- Output: docs/changes/<F>/<S>-change-note.md; docs/architecture/workspace.dsl; CHANGELOG.md; docs/architecture/screens/; docs/trace/<F>.html
 - Handoff: /ship release
 - Outcome: Shipped and recorded
 - Never: hand-edit a generated page that agents read; read profile/confidence-weights.yaml (hooks: protect_weights, state_gate, commit_scope)
@@ -52,6 +52,8 @@ Produce:
 5b. If `docs/context/understanding/` exists, run `baton context understand` after step 2's extract. Add to the change note `- **Understanding:** stale <area>, <area>; run /build-context-map refresh` for the areas it lists as stale, or `Understanding: unchanged`. Never edit a note: the explorers re-read a stale area, and a feature that changes it is not accepted for stories until they do.
 
 5c. Publish for people (only when a Confluence tool from an allowed connector is available; otherwise skip and say "not published"): overwrite one page per artefact type from the files in Git - the architecture page from `docs/architecture/diagrams/diagrams.md`, the change note, the readiness lines of `baton context score`, and "what we know" from `docs/context/understanding/status.md`. Pages are copies: never read one back, never edit Git from one, and say in the change note which pages were updated.
+
+5d. A story labelled `ui`: run `baton ux promote <story-id>`. It copies the approved wireframe and the spec to `docs/architecture/screens/<screen-id>/`, stamps the spec, appends the history line and rewrites `docs/architecture/screens/index.md`; never do any of it by hand. Add its printed line to the change note as `- **Screen:** <screen-id>: <changes>`; exit 2 means no approved wireframe: say so for the Tech Lead. In the metrics row add `wireframe_rounds` (gate 2a rounds in `<story-id>-build.json`) and `ux_findings_high` (HIGH rows in `<story-id>-reviews/ux.md`).
 
 6. Copy the `Design conformance` table from `docs/qa/<feature-id>/<story-id>-as-built/diagrams.md` into the change note. Anything built but not in the spec, and not explained under the design's `## Deviations`, goes under `Undeclared architecture change` (the retro reads these). If the as-built folder is missing, run `baton diagram story <story-id> --diff <merge base>`; if that cannot run, state "conformance not checked".
 

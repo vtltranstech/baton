@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "screen-spec",
+  "description": "The JSON twin of screen-spec.md, written by baton ux check (contracts/ui-stories.md section 3).",
+  "type": "object",
+  "required": [
+    "screen",
+    "regions",
+    "fields",
+    "actions",
+    "states",
+    "rules"
+  ],
+  "properties": {
+    "screen": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "persona": {
+      "type": "string"
+    },
+    "task": {
+      "type": "string"
+    },
+    "area": {
+      "type": "string"
+    },
+    "route": {
+      "type": "string"
+    },
+    "entry_points": {
+      "type": "string"
+    },
+    "screen_of_record": {
+      "type": "string"
+    },
+    "files": {
+      "type": "string"
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "region",
+          "items",
+          "component"
+        ],
+        "properties": {
+          "region": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "component": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "name",
+                  "new",
+                  "uses"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "new": {
+                    "type": "boolean"
+                  },
+                  "uses": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "field",
+          "label",
+          "source"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "object",
+            "required": [
+              "kind",
+              "new"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "endpoint",
+                  "param",
+                  "route",
+                  "derived",
+                  "static",
+                  "unknown"
+                ]
+              },
+              "new": {
+                "type": "boolean"
+              },
+              "method": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "field": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "param": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          },
+          "source_text": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^R[0-9]+$"
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "action",
+          "label",
+          "target"
+        ],
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "target": {
+            "type": "object",
+            "required": [
+              "kind",
+              "new"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "endpoint",
+                  "param",
+                  "route",
+                  "derived",
+                  "static",
+                  "unknown"
+                ]
+              },
+              "new": {
+                "type": "boolean"
+              },
+              "method": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "field": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "param": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          },
+          "target_text": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "state"
+        ],
+        "properties": {
+          "state": {
+            "type": "string"
+          },
+          "when": {
+            "type": "string"
+          },
+          "shows": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^R[0-9]+$"
+      }
+    }
+  }
+}

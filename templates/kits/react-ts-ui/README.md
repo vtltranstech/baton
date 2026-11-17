@@ -17,10 +17,16 @@ A React 19 + TypeScript (strict) UI on Vite, with the baton ESLint sensors alrea
 5. Set `ORG_NPM_REGISTRY`, run `npm install` once, commit `package-lock.json` (CI runs `npm ci`), push, and turn on branch protection for the default branch.
 6. In the central repo, add the row to `profile/project.md` and run `/onboard`.
 
+## UI stories (contracts/ui-stories.md)
+- **Component library:** add the org's library package to `dependencies` from the org registry, and set `config/ui-library.json` equal to `ui.library.import` and `ui.library.forbid` in the central `profile/project.md`. ESLint then refuses a direct import of what the library wraps.
+- **Accessibility lint:** `eslint-plugin-jsx-a11y`, recommended rules.
+- **Built screen:** every field carries `data-field`, every action `data-action`, every state `data-state`, as the approved `screen-spec.md` names them; `baton ux verify <S>` reads them.
+- **Sensors:** `npm run ui:sensors -- --out <central>/docs/qa/<F>/<S>-sensors --budget "<ui.budgets>" <url>` runs axe (WCAG 2.2 AA) and a Core Web Vitals budget through Playwright; `--screenshot <central>/docs/architecture/screens/<id>/built.png` keeps the built screen. Its browser comes from the org mirror (`PLAYWRIGHT_DOWNLOAD_HOST`).
+
 ## What /onboard still asks
 - The repo table row in the central repo's `profile/project.md`: path, purpose, build command.
 - The domain words the screens use, for the naming checks.
 - The test environment: its name and the backend URL the UI points at there.
 - Anything the extractors report as `unknown`.
 
-Not verified here: the kit was not installed, linted or built, because nothing may be downloaded outside the org registry. The ESLint config and versions match `fixtures/sample-react-repo`.
+Not verified here: the kit was not installed, linted or built, because nothing may be downloaded outside the org registry. The ESLint config and versions match `fixtures/sample-react-repo`; the jsx-a11y, Playwright and axe versions and `scripts/ui-sensors.mjs` have not been run.

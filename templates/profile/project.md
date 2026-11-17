@@ -16,6 +16,12 @@
 | track.auto-pass.confidence | 80 |
 | estimate.lines.S | 300 |
 | estimate.lines.M | 800 |
+| ui.library | <the organisation's UI component library, or none> |
+| ui.library.path | <its folder(s), relative to this repo, e.g. ../ui-library/src; source, typings or one .md per component> |
+| ui.library.import | <the package screens import it from, e.g. @org/ui> |
+| ui.library.forbid | <packages screens must not import directly, e.g. @mui/*, or none> |
+| ui.designer | <who joins gate 2a, or none> |
+| ui.budgets | LCP 2500, CLS 0.1, INP 200 |
 
 ## Repos (siblings of this folder)
 | Path | What it is | Build |

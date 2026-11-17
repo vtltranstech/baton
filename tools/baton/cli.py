@@ -47,6 +47,7 @@ SUBCOMMANDS = {
     "agents": "baton.agents_check",
     "models": "baton.models",
     "context": "baton.context.cmd",
+    "ux": "baton.ux.cmd",
 }
 
 

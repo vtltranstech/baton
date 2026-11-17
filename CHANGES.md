@@ -1,3 +1,18 @@
+# UI stories: wireframes, the organisation's component library, gate 2a, screens of record
+
+| Path | Change |
+| --- | --- |
+| `contracts/ui-stories.md` (new) | the UI stories guide adapted to baton: the architect's UI mode, `screen-spec.md`, the component library keys and inventory, the UX lens, gate 2a, screens of record, `ux verify`, the kit's sensors, and where it differs from the guide |
+| `tools/baton/ux/` (new), `tools/baton/extract/extract_cmd.py`, `tools/baton/cli.py` | `baton ux inventory` (= `extract --ui`), `ux check`, `ux show`, `ux verify`, `ux diff`, `ux promote` |
+| `tools/baton/orchestrate.py`, `skills/build`, `skills/workflow` | a `ui` story gets the wireframe, `baton ux check`, the UX lens and gate 2a (the PO, `--answer option-N --by PO`) before the design; on the light track one delta and one question for the PO and the Tech Lead (`--by PO+TL`), no auto-pass |
+| `tools/baton/state_check.py`, `contracts/states.md` | Designed needs the approved wireframe and `## Wireframe approval` (full) or the delta (light) for a `ui` story |
+| `tools/baton/confidence.py` | a serious or critical `axe.json` violation turns the sensors red; `ui-verify.json` HIGH zeroes the conformance signal, MEDIUM halves it |
+| `agents/architect.md`, `developer.md`, `documentation.md`, `story-drafter.md` | UI mode; build from the spec with the library and the data attributes, then `ux verify`; `ux promote` and the UI metrics; the `ui` label |
+| `skills/ux-checklist` (new), `skills/design-review-lenses`, `skills/review-lenses`, `skills/triage`, `skills/retro`, `skills/stories` | the UX lens; the screen check in the conformance lens; the `ui` label; gate 2a wait and UX-lens precision |
+| `templates/ui/` (new), `templates/profile/project.md`, `templates/story.md`, `schemas/screen-spec.json` (new) | the lo-fi stylesheet, wireframe and spec templates; the `ui.*` keys; the spec's JSON schema |
+| `templates/kits/react-ts-ui` | jsx-a11y, no direct import of what the library wraps, `npm run ui:sensors` (axe and Web Vitals through Playwright) |
+| `fixtures/sample-ui/` (new) | a component library, a UI repo, the built screen, and two stories: a new screen with three options and a light delta |
+
 # Agent blueprints, baton build, security last, starter kits; build-phase files removed
 
 | Path | Change |

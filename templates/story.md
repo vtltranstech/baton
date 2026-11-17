@@ -21,4 +21,6 @@ As a <role>, I want <capability> so that <outcome>.
 ## Open questions
 - (anything you already know is unclear)
 
+<!-- A story that adds or changes a screen carries the label `ui`: /build writes `## Wireframe approval` here at gate 2a (contracts/ui-stories.md). -->
+
 <!-- Save under docs/stories/<F-xxx>/ to attach to a feature, or docs/stories/backlog/ for ad hoc. Then run: /ready S-nnn -->

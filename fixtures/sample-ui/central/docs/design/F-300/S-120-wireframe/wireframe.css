@@ -1,0 +1,29 @@
+/* Lo-fi wireframe stylesheet (contracts/ui-stories.md section 9). No colour variables on purpose:
+   grey boxes, 1px borders, the system font, three text sizes. Wireframes link this file and add nothing. */
+* { box-sizing: border-box; }
+body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; font-size: 14px; line-height: 1.4;
+  background: #fff; color: #222; }
+.screen { max-width: 1200px; margin: 0 auto; }
+.title { font-size: 20px; font-weight: 600; margin: 0 0 12px; }
+.small { font-size: 12px; }
+[data-region] { position: relative; border: 1px solid #888; padding: 22px 12px 12px; margin: 0 0 12px; }
+[data-region]::before { content: attr(data-region) " - " attr(data-component); position: absolute; top: 2px;
+  left: 6px; font-size: 12px; color: #555; }
+[data-changed] { border: 3px dashed #222; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.col { flex: 1 1 240px; min-width: 0; }
+.field { display: flex; gap: 8px; padding: 4px 0; }
+.label { min-width: 140px; color: #555; }
+.value { flex: 1; border-bottom: 1px solid #bbb; min-height: 18px; }
+.value::after { content: "\00a0"; }
+button, .action { font: inherit; border: 1px solid #555; background: #eee; padding: 6px 12px;
+  border-radius: 0; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #aaa; padding: 4px 6px; text-align: left; font-size: 12px; }
+th { background: #eee; }
+.placeholder { border: 1px dashed #999; background: #f2f2f2; min-height: 120px; display: flex;
+  align-items: center; justify-content: center; color: #666; font-size: 12px; }
+.states { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+[data-state] { border: 1px dotted #888; padding: 8px; font-size: 12px; }
+[data-state]::before { content: "state: " attr(data-state); display: block; font-weight: 600; }
+@media (max-width: 600px) { body { padding: 8px; } .label { min-width: 100px; } }

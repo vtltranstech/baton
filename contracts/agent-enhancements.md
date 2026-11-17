@@ -53,8 +53,8 @@ Steps, by State:
 | State | Steps |
 | --- | --- |
 | Draft, Needs Clarification, Ready for PO | `skill`: /ready (gate 1) |
-| Ready, Design Changes Requested | gate 0 (`baton context check S --track T`; refused: `skill` /build-context-map focus F, or the recorded override), `baton deps S`, then `agent` architect |
-| Designed | full track: a pattern-ledger Verification cell naming no test or ArchUnit rule sends the design back (State Design Changes Requested, by `baton`); light track at or above `track.auto-pass.confidence` with no mandatory label, or `hotfix`: auto-pass; else `gate` |
+| Ready, Design Changes Requested | gate 0 (`baton context check S --track T`; refused: `skill` /build-context-map focus F, or the recorded override), `baton deps S`; a `ui` story: `agent` architect step wireframe, `baton ux check`, `do` ux-lens, `gate` gate2a (contracts/ui-stories.md); then `agent` architect |
+| Designed | full track: a pattern-ledger Verification cell naming no test or ArchUnit rule sends the design back (State Design Changes Requested, by `baton`); light track at or above `track.auto-pass.confidence` with no mandatory label, or `hotfix`: auto-pass, never for a `ui` story (one question for the PO and the Tech Lead); else `gate` |
 | Design Approved | `agent` developer |
 | In Review | `do` checks (diff shape, impact, mutation, as-built, risk) once per set of branch heads, then `agent` qa |
 | QA Fail | `agent` developer with the triage file as the only review input (section 5); after 2 loops, `stop` for the Senior Engineer |

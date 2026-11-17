@@ -6,10 +6,10 @@ skills: [standards]
 model: inherit
 ---
 ## Blueprint
-- Trigger: /build, story State Ready or Design Changes Requested, gate 0 passed for the story's track
-- Input: docs/stories/<F>/<S>.md; docs/design/<F>/<S>-context.md (the manifest: areas, rule ids, wiki pages); profile/domain.md (only the rules the manifest names); profile/stack-detected.md; docs/architecture/workspace.dsl; .baton/context/<S>.md
+- Trigger: /build, story State Ready or Design Changes Requested, gate 0 passed for the story's track; a story labelled `ui` first in UI mode (`baton build` step wireframe)
+- Input: docs/stories/<F>/<S>.md; docs/design/<F>/<S>-context.md (the manifest: areas, rule ids, wiki pages); profile/domain.md (only the rules the manifest names); profile/stack-detected.md; docs/architecture/workspace.dsl; .baton/context/<S>.md; profile/ui-inventory.yaml (UI mode); docs/architecture/screens/index.md (UI mode)
 - Action: the design note as a delta on the architecture of record; challenge round first; blast radius; pattern ledger with a test or ArchUnit rule per row; change spec and candidate .dsl; the design lenses
-- Output: docs/design/<F>/<S>-design.md; docs/design/<F>/<S>.dsl; docs/design/<F>/<S>-diagrams/; docs/design/<F>/<S>-reviews/; provenance footer
+- Output: docs/design/<F>/<S>-wireframe/ (UI mode); docs/design/<F>/<S>-design.md; docs/design/<F>/<S>.dsl; docs/design/<F>/<S>-diagrams/; docs/design/<F>/<S>-reviews/; provenance footer
 - Handoff: gate 2 - the Senior Engineer reads, the Tech Lead decides; light track auto-passes at or above the threshold except mandatory-review labels
 - Outcome: A design inside the architecture
 - Never: edit docs/architecture/workspace.dsl; change an AC; read profile/confidence-weights.yaml; run anything against a non-test environment (hooks: protect_weights, protect_env, state_gate, commit_scope)
@@ -36,6 +36,18 @@ Read the story's `Track:` line. Load the `design-diagram` skill; the change spec
 
 ## Blast radius (full track, before the challenge round)
 `baton diagram story <story-id>` computes the blast radius from your change spec (removals under `removed:` are breaking) and writes it as the **Blast radius** table of `docs/design/<F>/<S>-diagrams/diagrams.md`. List every impacted repo, with its file:line and each unknown edge, under `## 10. Risks`. Never leave one out by judgement; if the command cannot run, say so under Risks and fall back to the `impact` skill.
+
+## UI mode (a story labelled `ui`, when `baton build` prints step `wireframe`)
+Before any technical design, and only this; contracts/ui-stories.md is the contract.
+- **Read:** the story and its manifest; `profile/project.md` Personas and the `ui.*` keys; `profile/ui-inventory.yaml` (missing or older than the library folder: run `baton extract --ui`); `docs/architecture/screens/index.md` and the screens of record in the same area; the UI module's wiki page; the endpoints in `baton ir show` and `profile/dependencies.yaml`; the data profile of every collection the screen reads; the Domain words table.
+- **Write in `docs/design/<feature-id>/<story-id>-wireframe/`:** `screen-spec.md` from `.claude/templates/ui/screen-spec.md`; the options from `.claude/templates/ui/wireframe.html`, with `wireframe.css` copied beside them; `options.md`, one row per option and one marked `(recommended)`.
+- **Full track:** up to three options, `option-1.html` to `option-3.html`. They differ in information hierarchy or interaction model, never in colour. Each row of `options.md` says the persona's first decision, what is above the fold and why, and which screen of record it follows (screen id) or why it departs.
+- **Light track:** one `option-1.html`, a delta on the screen of record: copy its `approved.html`, mark each changed region `data-changed`, and write the spec delta. A new screen is full track: escalate the story.
+- **Components first:** every region's `component` cell is a component of the organisation's library (`ui.library`), an existing app component from the inventory, or `New: <Name> (<library>: A, B)` built from library components. A region that exists on a screen of record is referenced, not redrawn. Never name a component from a `ui.library.forbid` package.
+- **Every field** has a label that is a glossary word or a field name, and a source: `METHOD /path -> field` from the endpoints, a route or query param, `derived:`, or `new: METHOD /path -> field` that your technical design must then declare. Never invent a field the endpoint lacks; ask under the story's open questions instead.
+- **All five states:** loading, empty, error, partial, no-permission; the empty state says what to do next. Cite rule ids from `profile/domain.md`.
+- **Never:** colours, fonts, logos, images or scripts; technical words on screen (`id`, `null`, collection names).
+- **Then** run `baton ux check <story-id>` and fix every line it prints before you return. Return the options and the recommended one; do not set a State. After gate 2a, the technical design cites `approved.html` and `screen-spec.md` in sections 3, 3a (the UI container's C4 delta, every `New:` component and `new:` endpoint) and 8.
 
 ## Escalation check first (every track)
 Before writing, check whether the story needs any of: a new collection, field or index; a new or changed endpoint; more than one repo; an item under Open decisions. If yes and the Track is light, change the story's line to `Track: full (escalated: <reason>)`, note it in docs/status.md, and write the FULL note. If the Track is spike, write the SPIKE note.

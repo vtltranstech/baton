@@ -1,0 +1,14 @@
+# Hand-written for the UI fixture (schemas/dependencies.json).
+generated: 2026-11-01T10:00:00Z
+repos:
+  - repo: invoice-service
+    commit: c3d4e5f
+    edges:
+      - kind: EXPOSES
+        from: class:com.sample.invoice.InvoiceController
+        to: "endpoint:GET /invoices/{id}"
+        provenance: {file: src/main/java/com/sample/invoice/InvoiceController.java, line: 21, extractor: spring-mapping}
+      - kind: EXPOSES
+        from: class:com.sample.invoice.InvoiceController
+        to: "endpoint:POST /invoices/{id}/send"
+        provenance: {file: src/main/java/com/sample/invoice/InvoiceController.java, line: 34, extractor: spring-mapping}

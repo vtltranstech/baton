@@ -60,6 +60,7 @@ Agents run only in the Claude Code panel. The `baton` command runs in any termin
 | Build one story | `/build S-010` | Claude Code |
 | Build a whole feature, stopping only at gates | `/deliver F-003` | Claude Code |
 | Review, approve, ship | `/sprint-review`, a human sets Approved, `/ship S-010` | Claude Code |
+| Approve a screen before it is designed (a `ui` story) | answer the wireframe question `/build` asks; `baton ux show S-010 --open` shows the options | Claude Code, then the browser |
 | See every story, its branches, pushed or merged | `baton board` (`--fetch` first to refresh `origin/`) | terminal |
 | See one story across every repo | `baton board --story S-010` | terminal |
 | See what one story's build has done, and what is next | `baton build S-010 --status`, then `baton build S-010` | terminal |

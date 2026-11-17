@@ -32,5 +32,5 @@ For each story the drafter wrote, in id order: `git switch -c story/<feature-id>
 Run the `ready` skill on every story of this feature that is in Draft or Needs Clarification - the agent's and the humans' alike. Same checklist, same clarification loop, same hand-off.
 
 ## 4. Report
-If a human is present, offer the `elicitation` menu once against the drafted set (Proceed is fine). Then print, for the Product Owner: a table (story id, title, author agent|human, Jira-Type, Labels, Track, estimate, readiness score, state), every open question grouped by story, and the feature's own open clarifications. End with: "Set State: Ready on the stories you accept (or answer the /ready prompt), then /build <id> or /sprint."
+If a human is present, offer the `elicitation` menu once against the drafted set (Proceed is fine). Then print, for the Product Owner: a table (story id, title, author agent|human, Jira-Type, Labels, Track, estimate, readiness score, state), every open question grouped by story, and the feature's own open clarifications. A story that adds or changes a screen carries the label `ui`; say that its wireframe comes to the PO at gate 2a before any design. End with: "Set State: Ready on the stories you accept (or answer the /ready prompt), then /build <id> or /sprint."
 Do NOT set any story to Ready yourself.

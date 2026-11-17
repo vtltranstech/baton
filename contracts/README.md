@@ -9,6 +9,7 @@ Agents read them and never edit them. A contract that turns out wrong is raised 
 | `confidence.md` | signals, weights file, caps, policy, evidence.md layout |
 | `states.md` | story states and the prerequisite artefacts `state-check` enforces |
 | `graph.md` | node/edge schema, provenance, C4 projection rules |
+| `ui-stories.md` | `ui` stories: the architect's UI mode, wireframe options, `screen-spec.md`, the organisation's component library and the inventory, the UX lens, gate 2a, screens of record, `baton ux` |
 | `agent-enhancements.md` | agent blueprints, the outcome table, `baton build` orchestration, security last, the triage-only fix loop, systems of record, starter kits, `baton agents check` |
 | `versioning.md` | central-repo story branches, commit points, the docs PR and tags, architecture stamps and changelog, the archive |
 | `trace.md` | the feature trace page: inputs, provenance footer, layout, trace.json |

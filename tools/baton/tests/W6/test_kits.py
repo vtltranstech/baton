@@ -144,3 +144,17 @@ def test_every_kit_file_is_ascii_and_free_of_project_words():
             if words.search(line):
                 bad.append(f"{path.relative_to(ROOT)}:{n}: {line.strip()[:80]}")
     assert not bad, "\n".join(bad)
+
+
+def test_the_ui_kit_lints_accessibility_and_the_library_boundary():
+    base = KITS / "react-ts-ui"
+    config = (base / "eslint.config.js").read_text()
+    assert "jsx-a11y" in config and "no-restricted-imports" in config and "ui-library.json" in config
+    library = json.loads((base / "config" / "ui-library.json").read_text())
+    assert library["import"] and library["forbid"]
+    package = json.loads((base / "package.json").read_text())
+    assert package["scripts"]["ui:sensors"] == "node scripts/ui-sensors.mjs"
+    wanted = {"eslint-plugin-jsx-a11y", "@playwright/test", "@axe-core/playwright"}
+    assert wanted <= set(package["devDependencies"])
+    runner = (base / "scripts" / "ui-sensors.mjs").read_text()
+    assert "axe.json" in runner and "web-vitals.json" in runner and "wcag22aa" in runner

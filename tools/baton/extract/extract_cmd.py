@@ -15,9 +15,18 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--repo", help="only this repo from profile/project.md; other repos' entries are kept"
     )
+    parser.add_argument(
+        "--ui",
+        action="store_true",
+        help="only the UI component inventory: profile/ui-inventory.yaml (= baton ux inventory)",
+    )
 
 
 def run(args: argparse.Namespace) -> int:
+    if getattr(args, "ui", False):
+        from baton.ux.cmd import inventory
+
+        return inventory(Path(args.central).resolve(), args.json)
     try:
         outcome = run_extract(Path(args.central), args.repo)
     except MissingInput as exc:

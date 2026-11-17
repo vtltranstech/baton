@@ -3,6 +3,7 @@
 baton build S                    run the deterministic steps, then print the one an agent or a human does
 baton build S --done STEP        that step returned: check what it wrote, record it, print the next
 baton build S --answer approve|changes|block --by TL [--note "..."]   the gate 2 decision
+baton build S --answer option-2|changes|block --by PO [--note "..."]  gate 2a, a `ui` story's wireframe
 baton build S --from STEP        forget STEP and every later step, then as plain
 baton build S --status           the steps recorded so far
 baton build S --security-check   exit 2 when the security report is missing, BLOCKED or older than a
@@ -15,6 +16,10 @@ do what it prints (run the named agent, run a skill, ask the gate question), the
 saw, so a step is skipped while its outputs exist and the code has not moved, and security runs again
 after any later commit. Exit 0: an action is printed, or the story reached the stop before gate 3.
 Exit 2: refused or stopped, with the reason.
+
+A story labelled `ui` gets its wireframe first (contracts/ui-stories.md): the architect in UI mode, `baton ux
+check`, the UX lens, then gate 2a (the PO picks an option), then the technical design. On the light track the
+wireframe is one delta and gate 2a and gate 2 are one question to the PO and the Tech Lead.
 """
 
 from __future__ import annotations
@@ -33,7 +38,23 @@ from baton import state_check
 from baton.confidence import header_value, project_value
 
 EXIT_OK, EXIT_REFUSED = 0, 2
-STEPS = ("gate0", "deps", "architect", "gate2", "developer", "checks", "qa", "security", "confidence")
+STEPS = (
+    "gate0",
+    "deps",
+    "wireframe",
+    "ux-check",
+    "ux-lens",
+    "gate2a",
+    "architect",
+    "gate2",
+    "developer",
+    "checks",
+    "qa",
+    "security",
+    "confidence",
+)
+ANSWERS = ("approve", "changes", "block", "option-1", "option-2", "option-3")
+MAX_CHECK_FAILURES = 3
 MANDATORY_LABELS = {"new-api", "data-model", "batch-job"}
 MAX_DESIGN_ROUNDS = MAX_FIX_LOOPS = 2
 _LENS_FILE = re.compile(r"-lens-[\w-]+\.md")
@@ -43,8 +64,8 @@ _VERIFIES = re.compile(r"\b\w+(?:Test|Tests|IT)\b(?:#\w+)?|ArchUnit|Architecture
 def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("story_id", help="the story id, e.g. S-010")
     parser.add_argument("--done", metavar="STEP", choices=STEPS, help="the step that just returned")
-    parser.add_argument("--answer", choices=("approve", "changes", "block"), help="the gate 2 decision")
-    parser.add_argument("--by", choices=("TL", "SE", "PO"), help="who decided (with --answer)")
+    parser.add_argument("--answer", choices=ANSWERS, help="the gate 2 decision, or gate 2a's option")
+    parser.add_argument("--by", choices=("TL", "SE", "PO", "PO+TL"), help="who decided (with --answer)")
     parser.add_argument("--note", default="", help="the reason or the changes asked for (with --answer)")
     parser.add_argument("--from", dest="from_step", metavar="STEP", choices=STEPS, help="redo from this step")
     parser.add_argument("--status", action="store_true", help="print the recorded steps")
@@ -99,6 +120,16 @@ class Build:
     def last(self, step: str) -> dict | None:
         return next((s for s in reversed(self.steps()) if s.get("step") == step), None)
 
+    def pos(self, step: str, **match) -> int:
+        """Index of the last `step` entry whose fields match (a callable tests the value); -1 if none."""
+        for index in range(len(self.steps()) - 1, -1, -1):
+            entry = self.steps()[index]
+            if entry.get("step") != step:
+                continue
+            if all(v(entry.get(k)) if callable(v) else entry.get(k) == v for k, v in match.items()):
+                return index
+        return -1
+
     def current(self, step: str) -> bool:
         """Recorded, and the code has not moved since."""
         seen = self.last(step)
@@ -143,6 +174,20 @@ class Build:
             return result.missing
         self.story.path.write_text(text, encoding="utf-8")
         return None
+
+    def append(self, heading: str, lines: list[str]) -> None:
+        """Append to `## <heading>` without moving the State (gate 2a)."""
+        text = self.text()
+        body = "\n".join(lines) + "\n"
+        part = re.search(rf"^##[ \t]+{re.escape(heading)}\b[^\n]*\n", text, re.M)
+        if part is None:
+            text = text.rstrip("\n") + f"\n\n## {heading}\n{body}"
+        else:
+            rest = text[part.end() :]
+            following = re.search(r"^##[ \t]", rest, re.M)
+            cut = part.end() + (following.start() if following else len(rest))
+            text = text[:cut].rstrip("\n") + "\n" + body + ("\n" + text[cut:] if following else "")
+        self.story.path.write_text(text, encoding="utf-8")
 
     # --- deterministic steps ------------------------------------------------------------------------------
     def cli(self, *argv: str) -> tuple[int, str]:
@@ -241,6 +286,147 @@ class Build:
         value = header_value(self.text(), "Labels") or ""
         return {part.strip().lower() for part in value.split(",") if part.strip() and part.strip() != "none"}
 
+    # --- a `ui` story: wireframe, ux check, UX lens, gate 2a (contracts/ui-stories.md) ---------------------
+    def ui(self) -> bool:
+        return "ui" in self.labels()
+
+    def wireframe(self, name: str = "") -> Path:
+        folder = self.story.design("wireframe")
+        return folder / name if name else folder
+
+    def wireframe_inputs(self) -> list[str]:
+        paths = [self.wireframe("screen-spec.md")]
+        paths.append(self.wireframe("approved.html" if self.track() != "light" else "option-1.html"))
+        return [self.rel(p) for p in paths if p.is_file()]
+
+    def recommended(self) -> int | None:
+        try:
+            text = self.wireframe("options.md").read_text(encoding="utf-8")
+        except OSError:
+            return None
+        for line in text.splitlines():
+            found = re.search(r"option[ -]?(\d)", line, re.I)
+            if found and re.search(r"recommended", line, re.I):
+                return int(found.group(1))
+        return None
+
+    def ui_steps(self) -> Action | None:
+        """The next wireframe step of a `ui` story in Ready or Design Changes Requested; None when done."""
+        if not self.ui():
+            return None
+        light = self.track() == "light"
+        wire = self.pos("wireframe")
+        redo = max(
+            self.pos("ux-check", ok=False),
+            self.pos("gate2a", answer="changes"),
+            self.pos("gate2", answer="changes") if light else -1,
+        )
+        if wire == -1 or redo > wire:
+            failures = sum(1 for s in self.steps() if s.get("step") == "ux-check" and s.get("ok") is False)
+            if failures >= MAX_CHECK_FAILURES:
+                return Action(
+                    "stop", "ux-check", f"the wireframe failed baton ux check {failures} times: a human looks"
+                )
+            last = self.steps()[redo] if redo > wire and redo >= 0 else {}
+            why = f" Redo it: {last.get('note')}" if last.get("note") else ""
+            manifest = self.story.design("context.md")
+            extra = [
+                self.central / "profile" / "ui-inventory.yaml",
+                self.central / "docs" / "architecture" / "screens" / "index.md",
+                self.central / ".claude" / "templates" / "ui" / "wireframe.html",
+            ]
+            what = "one wireframe as a delta on the screen of record" if light else "up to three options"
+            return Action(
+                "agent",
+                "wireframe",
+                f"UI mode: {what} and screen-spec.md for {self.sid} in {self.rel(self.wireframe())}/, "
+                "every region built from the "
+                f"component library (contracts/ui-stories.md section 2).{why}",
+                agent="architect",
+                inputs=[self.rel(self.story.path)] + [self.rel(p) for p in [manifest, *extra] if p.is_file()],
+                then=f"baton build {self.sid} --done wireframe",
+            )
+        if self.pos("ux-check") < wire:
+            code, out = self.cli("ux", "check", self.sid)
+            if code != 0:
+                problems = [line for line in out.splitlines() if line.strip()]
+                self.record("ux-check", ok=False, note="; ".join(problems[:6]))
+                self.log.append(f"baton ux check: {len(problems)} problems, back to the architect")
+                return self.ui_steps()
+            self.record("ux-check", ok=True)
+            self.log.append("baton ux check: ok")
+        if light:
+            return None
+        checked = self.pos("ux-check", ok=True)
+        if self.pos("ux-lens") < checked:
+            return Action(
+                "do",
+                "ux-lens",
+                f"run the UX lens of the design-review-lenses skill on {self.sid} (role skill "
+                "ux-checklist): it "
+                f"writes {self.rel(self.story.design('reviews') / 'ux.md')}",
+                inputs=[
+                    self.rel(p) for p in sorted(self.wireframe().glob("*")) if p.suffix in (".html", ".md")
+                ],
+                then=f"baton build {self.sid} --done ux-lens",
+            )
+        if self.pos("gate2a", answer=lambda a: str(a or "").startswith("option")) < self.pos("ux-lens"):
+            self.cli("ux", "show", self.sid)
+            options = sorted(p.stem for p in self.wireframe().glob("option-*.html"))
+            best = self.recommended()
+            designer = (project_value(self.central, "ui.designer") or "").strip()
+            who = "the PO" + (f" with {designer}" if designer and designer.lower() != "none" else "")
+            return Action(
+                "gate",
+                "gate2a",
+                f"Wireframes for {self.sid} are ready: open {self.rel(self.wireframe('index.html'))} "
+                f"(`baton ux show {self.sid} --open`); the UX lens is at "
+                f"{self.rel(self.story.design('reviews') / 'ux.md')}. Gate 2a is {who}'s.",
+                options=[f"{o}{' (Recommended)' if best and o == f'option-{best}' else ''}" for o in options]
+                + ["changes", "block"],
+                then=f'baton build {self.sid} --answer <option-n|changes|block> --by PO --note "<words>"',
+            )
+        return None
+
+    def answer_wireframe(self, choice: str, by: str | None, note: str) -> Action:
+        if self.track() == "light":
+            return Action("stop", "gate2a", "the light track answers wireframe and design together at gate 2")
+        pending = self.ui_steps()
+        if pending is None or pending.step != "gate2a":
+            return Action("stop", "gate2a", f"there is no gate 2a question open for {self.sid}")
+        if by not in ("PO", "PO+TL"):
+            return Action("stop", "gate2a", "gate 2a is the PO's: --by PO")
+        rounds = sum(1 for s in self.steps() if s.get("step") == "gate2a" and s.get("answer") == "changes")
+        if choice.startswith("option"):
+            chosen = self.wireframe(f"{choice}.html")
+            if not chosen.is_file():
+                return Action("stop", "gate2a", f"{self.rel(chosen)} does not exist")
+            self.wireframe("approved.html").write_bytes(chosen.read_bytes())
+            self.append(
+                "Wireframe approval",
+                [
+                    f"- {_today()} {by}: {choice.replace('-', ' ').title()} approved"
+                    + (f" - {note}" if note else "")
+                ],
+            )
+        elif choice == "changes" and rounds < MAX_DESIGN_ROUNDS:
+            self.append(
+                "Wireframe approval", [f"- {_today()} {by}: Changes requested (round {rounds + 1}): {note}"]
+            )
+        elif choice in ("changes", "block"):
+            line = f"- {_today()} {by}: " + (
+                f"still not approved after {rounds} rounds - {note}"
+                if choice == "changes"
+                else f"Blocked - {note}"
+            )
+            missing = self.write_state("Blocked", "Wireframe approval", [line])
+            if missing:
+                return Action("stop", "gate2a", f"refused: {missing}")
+        else:
+            return Action("stop", "gate2a", f"gate 2a takes option-<n>, changes or block, not {choice}")
+        self.record("gate2a", by=by, answer=choice, note=note)
+        return self.next()
+
     def gate2(self) -> Action | None:
         problems = self.ledger_problems() if self.track() == "full" else []
         if problems:
@@ -261,6 +447,17 @@ class Build:
         threshold = int(
             re.sub(r"\D", "", project_value(self.central, "track.auto-pass.confidence") or "") or 80
         )
+        if self.ui() and track == "light":
+            return Action(
+                "gate",
+                "gate2",
+                f"Wireframe delta and design for {self.sid} (light track): "
+                f"{', '.join(self.wireframe_inputs() + [self.rel(self.design())])}, confidence "
+                f"{score if score is not None else '?'}%. "
+                "One question for the PO and the Tech Lead together.",
+                options=["approve (wireframe + design)", "changes", "block"],
+                then=f'baton build {self.sid} --answer <approve|changes|block> --by PO+TL --note "<words>"',
+            )
         if track == "light" and not mandatory and ("hotfix" in labels or (score or 0) >= threshold):
             why = "hotfix" if "hotfix" in labels else f"light track, confidence {score}%"
             missing = self.write_state(
@@ -292,6 +489,16 @@ class Build:
         )
 
     def answer(self, choice: str, by: str | None, note: str) -> Action:
+        if self.ui() and self.state() in ("Ready", "Design Changes Requested"):
+            return self.answer_wireframe(choice, by, note)
+        if choice.startswith("option"):
+            return Action(
+                "stop", "gate2", f"{choice} answers gate 2a, and {self.sid} has no wireframe question open"
+            )
+        if self.ui() and self.track() == "light" and by != "PO+TL":
+            return Action(
+                "stop", "gate2", "a light `ui` story's wireframe and design are one answer: --by PO+TL"
+            )
         if self.state() != "Designed":
             return Action(
                 "stop", "gate2", f"{self.sid} is {self.state()}, not Designed: there is no gate 2 to answer"
@@ -304,6 +511,11 @@ class Build:
             if s.get("step") == "gate2" and s.get("answer") == "changes" and s.get("by") != "baton"
         )
         score = self.design_confidence()
+        if choice == "approve" and self.ui() and self.track() == "light":
+            delta = self.wireframe("option-1.html")
+            if delta.is_file():
+                self.wireframe("approved.html").write_bytes(delta.read_bytes())
+            self.append("Wireframe approval", [f"- {_today()} {by}: delta approved with the design"])
         if choice == "approve":
             line, state = (
                 f"- {_today()} {by}: Approved, confidence {score}%" + (f" - {note}" if note else ""),
@@ -353,11 +565,12 @@ class Build:
                 return self.developer(fix=[self.rel(security)])
             return Action("stop", "developer", f"{self.sid} is Blocked; a human unblocks it")
         if state in ("Ready", "Design Changes Requested"):
-            waiting = self.gate0() or self.deps()
+            waiting = self.gate0() or self.deps() or self.ui_steps()
             if waiting:
                 return waiting
             manifest = self.story.design("context.md")
             inputs = [self.rel(self.story.path)] + ([self.rel(manifest)] if manifest.is_file() else [])
+            inputs += self.wireframe_inputs() if self.ui() else []
             return Action(
                 "agent",
                 "architect",
@@ -459,6 +672,15 @@ class Build:
             if not self.design().is_file():
                 return f"{self.rel(self.design())} does not exist"
             return None if state == "Designed" else f"the story is {state}, not Designed"
+        if step == "wireframe":
+            if not self.wireframe("screen-spec.md").is_file():
+                return f"{self.rel(self.wireframe('screen-spec.md'))} does not exist"
+            if not any(self.wireframe().glob("option-*.html")):
+                return f"{self.rel(self.wireframe())} has no option-<n>.html"
+            return None
+        if step == "ux-lens":
+            lens = self.story.design("reviews") / "ux.md"
+            return None if lens.is_file() else f"{self.rel(lens)} does not exist"
         if step == "developer":
             if state != "In Review":
                 return f"the story is {state}, not In Review"

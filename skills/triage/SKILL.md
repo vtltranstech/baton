@@ -23,6 +23,7 @@ Every story carries `Jira-Type:` and `Labels:` (mirrored from Jira once connecte
 | `design-required` | force full |
 | `new-api`, `data-model`, `batch-job`, plus any label in `profile/project.md` -> `jira.labels.extra` | force full AND design review is mandatory regardless of confidence |
 | `multi-repo` | force full |
+| `ui` | the story adds or changes a screen: a wireframe and gate 2a (the PO) before the design (contracts/ui-stories.md); a new screen is full track; the light track has no auto-pass at gate 2 |
 | `hotfix` | light; gate 2 skipped; QA + security still run; PR is labelled `hotfix` and flagged for same-day human merge |
 | `spike` | spike track |
 

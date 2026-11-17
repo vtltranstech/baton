@@ -110,6 +110,9 @@ tokens: 41200
 | story written by a human | `/ready`, first time it sees the story | `<S>: story added (human)` |
 | readiness result | `/ready` | `<S>: readiness n/9` |
 | gate 1 | `/ready` after the PO's answer | `<S>: Ready (PO)` |
+| wireframe written (`ui`) | `/build` | `<S>: wireframe (architect, <n> options)` |
+| UX lens (`ui`) | `/build` | `<S>: UX lens (<verdict>, <n> high)` |
+| gate 2a (`ui`) | `/build` | `<S>: gate 2a option <n> (PO)` or `<S>: wireframe changes requested (PO, round <n>)` |
 | design written | `/build` | `<S>: design (architect, <confidence>%)` or `<S>: findings (spike)` |
 | design lenses | `/build` | `<S>: design lenses (<n> blocking)` |
 | gate 2 | `/build` after the decision | `<S>: design approved (TL)` / `<S>: design changes requested (TL, round n)` / `<S>: auto-passed (light, <confidence>%)` / `<S>: blocked (TL)` |

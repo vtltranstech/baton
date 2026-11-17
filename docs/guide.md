@@ -180,6 +180,9 @@ The context map is the first gate (gate 0): no story is drafted, readied or desi
 | Gate 0 refuses a story the Tech Lead accepts anyway | the Tech Lead adds `Gate-0-Override: <reason> (TL, YYYY-MM-DD)` to the story header, by hand | the refusal is recorded with the reason in the build ledger and shown as `override` on the board; agents cannot write the line |
 | An agent or skill file changed | `baton agents check` | blueprints, handoffs, outcomes, hooks and skill activation linted; exit 1 lists each problem |
 | A new service repo | copy a kit from `templates/kits/`, add its row to `profile/project.md`, then `/onboard` | sensors, CI and the Claude Code files from day one; on an existing repo `/onboard` writes the alignment list for the Tech Lead |
+| Your organisation has a UI component library | set `ui.library`, `ui.library.path` (its folder, relative to the central repo), `ui.library.import` and `ui.library.forbid` in `profile/project.md`, then `baton extract --ui` | `profile/ui-inventory.yaml`: every library component with its props, and each UI repo's routes and components; wireframes and screens are then built only from them |
+| A story adds or changes a screen | the label `ui` (`/stories` sets it); then `/build S-x` as usual | the architect draws up to three lo-fi wireframe options and `screen-spec.md`; `baton ux check` validates them; the UX lens reviews; the PO picks one at gate 2a (`baton ux show S-x --open` puts them side by side); only then the technical design (contracts/ui-stories.md) |
+| A screen of record changed: what moved | `baton ux diff <screen-id> S-008 S-010` | the two versions' regions side by side, the changed ones outlined |
 | Which story is where: branch, pushed, merged | `baton board` (any terminal, no session), `baton board --story S-x` for one story, `--fetch` to refresh origin first | one line per story: State, gate 0, its `story/<F>-<S>` branch (pushed, unpushed commits, merged), its `feature/<F>-<S>` branch in every service repo, the tag, and the next move (push, tag, focus, review); reads git only and writes nothing |
 | A new feature note in `docs/features/` | `/build-context-map focus F-x` | explores only the areas the feature changes and their neighbours; cheaper than a full run |
 | Before drafting stories | `/stories F-x` (or `/deliver F-x`) | gate 0: `baton context check F-x`; if refused, it runs `/build-context-map focus F-x` and asks you, then checks again; drafts only when the changed areas are understood, their boundary systems named and the feature's words defined |
@@ -347,6 +350,20 @@ Every PR, in the central repo and the service repos, targets the repo's default 
 
 ### Which model runs what
 `profile/models.yaml` (the Tech Lead's; the install adds the defaults) names a model per role and track: by default the strong model designs full-track stories and runs every reviewer (design lenses, review lenses, security), the fast model drafts, builds and orchestrates QA, the cheap one writes light-track docs and releases. A reviewer is never weaker than what it reviews; `baton models S-301` shows the pairing and refuses a file that breaks the rule. A failed QA loop moves the developer to the strong model. Metrics record both models per story, so `/retro` can tell whether the strong reviewer pays for itself.
+
+### UI stories: wireframe first, the PO picks, the library builds
+A story labelled `ui` gets its screen agreed before any technical design (contracts/ui-stories.md).
+
+| Step | Who | What you see |
+| --- | --- | --- |
+| Wireframe | architect, UI mode | `docs/design/<F>/<S>-wireframe/`: up to three grey-box options (`option-1.html`...), `options.md` with the recommended one, `screen-spec.md`: regions with the component each is built from, fields with their source endpoint, actions, the five states, the rules |
+| Check | `baton ux check S` (run by `baton build`) | every field traced to an endpoint, every region to a library or app component, all five states, labels in the glossary, no colour or image; a failure goes back to the architect |
+| UX lens | a fresh reviewer, `ux-checklist` | `<S>-reviews/ux.md`: task fit, consistency, misreading risk, states, density, accessibility, a verdict |
+| Gate 2a | the PO (and the designer, if `ui.designer` names one) | `baton ux show S --open`: the options side by side; the answer is recorded under `## Wireframe approval` and the option copied to `approved.html` |
+| Build | developer | the screen from the spec, each region from its library component, `data-field` / `data-action` / `data-state` on the page; `baton ux verify S` checks it, the kit's `npm run ui:sensors` runs axe and Web Vitals |
+| Record | documentation, `baton ux promote S` | `docs/architecture/screens/<screen-id>/` with the approved wireframe, the spec and one history line per story; the index of every screen |
+
+A light-track `ui` story changes an existing screen: one wireframe that outlines the changed regions, and one question for the PO and the Tech Lead together at gate 2.
 
 ### The feature trace page
 `baton trace F-003` writes `docs/trace/F-003.html`: one page that replaces a demo and a status meeting. `/ship` refreshes it after each story; `/sprint-review` and `/standup` link it.

@@ -410,6 +410,28 @@ def _context_gate(story: Story, track: str | None) -> str | None:
     return None
 
 
+def labels_of(text: str) -> set[str]:
+    match = re.search(r"^Labels:[ \t]*(.*)$", text, re.M | re.I)
+    return {p.strip().lower() for p in (match.group(1) if match else "").split(",") if p.strip()} - {"none"}
+
+
+def wireframe_problem(story: Story, track: str | None, text: str) -> str | None:
+    """A `ui` story is Designed only on an approved wireframe (full) or its delta (light); ui-stories.md 1."""
+    if "ui" not in labels_of(text):
+        return None
+    folder = story.design("wireframe")
+    if not (folder / "screen-spec.md").is_file():
+        return f"a ui story needs {story.rel(folder / 'screen-spec.md')}"
+    if track == "light":
+        delta = folder / "option-1.html"
+        return None if delta.is_file() else f"a light ui story needs the delta wireframe {story.rel(delta)}"
+    if not (folder / "approved.html").is_file():
+        return f"a ui story needs {story.rel(folder / 'approved.html')} (gate 2a: the PO picks an option)"
+    if not re.search(r"approved", section(text, "Wireframe approval") or "", re.I):
+        return "the story's `## Wireframe approval` does not record the PO's choice"
+    return None
+
+
 def missing_prerequisite(story: Story, new_state: str, text: str) -> str | None:
     """The first missing prerequisite, per contracts/states.md, or None."""
     track = track_of(text)
@@ -425,6 +447,9 @@ def missing_prerequisite(story: Story, new_state: str, text: str) -> str | None:
         return context_gate(story, track, text)
     if new_state == "Designed":
         problem = context_gate(story, track, text)
+        if problem:
+            return problem
+        problem = wireframe_problem(story, track, text)
         if problem:
             return problem
         finding = "findings.md" if track == "spike" else "design.md"

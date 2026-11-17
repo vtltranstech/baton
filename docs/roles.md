@@ -7,7 +7,7 @@ One row per outcome the team delivers. Every agent's `## Blueprint` names its ro
 | --- | --- | --- | --- |
 | Understood system | context explorers read each area, the integrator joins flows and the landscape, the grader checks every citation (gate 0) | the PO and the Tech Lead answer the day's questions (`baton context questions`), the Tech Lead resolves contradictions | the Tech Lead accepts an area by answering its questions, or overrides gate 0 for one story with a recorded `Gate-0-Override:` line |
 | Clear, aligned stories | drafts stories, asks for what the note lacks, checks the Definition of Ready | the PO gives intent, answers clarifications, confirms domain lines | the PO sets Ready (gate 1) |
-| A design inside the architecture | challenge round, C4 delta, pattern ledger, diagrams; the design lenses | the Senior Engineer reads first and writes findings | the Tech Lead approves, asks for changes or blocks (gate 2) |
+| A design inside the architecture | challenge round, C4 delta, pattern ledger, diagrams; the design lenses | the Senior Engineer reads first and writes findings | the Tech Lead approves, asks for changes or blocks (gate 2); for a `ui` story the PO first picks a wireframe option (gate 2a) |
 | Working, conforming code | builds to the design; sensors; fixes from the triage file | the Senior Engineer answers blocked questions, runs the loader on the test environment | - |
 | Verified change | AC tests, data checks, the review lenses, triage, security last | the Senior Engineer marks each lens finding agree or disagree | - |
 | Accepted change | confidence.json, evidence.md, the trace page | the Senior Engineer reads by lane; the PO confirms the feature outcome (full track) | the Tech Lead sets Approved (gate 3) |

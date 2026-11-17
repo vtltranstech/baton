@@ -172,6 +172,20 @@ def sensor_status(sensors: Path) -> dict[str, tuple[str, str]]:
     if style.is_file():
         count = len(re.findall(r"<error\b", style.read_text(errors="replace")))
         result["checkstyle"] = ("green" if not count else "red", f"checkstyle.xml: {count} errors")
+    axe = sensors / "axe.json"
+    if axe.is_file():
+        try:
+            pages = json.loads(axe.read_text())
+            pages = pages if isinstance(pages, list) else [pages]
+            bad = sum(
+                1
+                for page in pages
+                for v in (page or {}).get("violations") or []
+                if (v or {}).get("impact") in ("serious", "critical")
+            )
+            result["axe"] = ("green" if not bad else "red", f"axe.json: {bad} serious or critical")
+        except (ValueError, AttributeError, TypeError):
+            result["axe"] = ("red", "axe.json is unreadable")
     eslint = sensors / "eslint.json"
     if eslint.is_file():
         try:
@@ -416,6 +430,17 @@ class _Scorer:
             )
         verdict = re.sub(r"\s*\(.*$", "", conformance).strip().upper()
         shown = f"{self.report_rel}: {verdict}, {reinterpreted} reinterpreted"
+        ui = self.story.qa("ui-verify.json")
+        if ui.is_file():
+            try:
+                levels = {m.get("severity") for m in json.loads(ui.read_text()).get("mismatches") or []}
+            except (ValueError, AttributeError, TypeError):
+                levels = {"HIGH"}
+            shown += f"; {self.story.rel(ui)}: " + (", ".join(sorted(levels)) or "conforms")
+            if "HIGH" in levels:
+                return self._score("conformance_fidelity", 0, shown)
+            if "MEDIUM" in levels and verdict == "CONFORMS":
+                return self._score("conformance_fidelity", CONFORMANCE_DEVIATION, shown)
         if verdict == "DEVIATES" or reinterpreted:
             return self._score("conformance_fidelity", 0, shown)
         if verdict == "CONFORMS":
