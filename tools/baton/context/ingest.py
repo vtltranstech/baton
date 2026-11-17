@@ -523,7 +523,10 @@ def options_from(settings) -> Options:
     return options
 
 
-def run_ingest(central: Path, patterns: list[str], options: Options | None = None) -> dict:
+def run_ingest(central: Path, patterns: list[str], options: Options | None = None, progress=None) -> dict:
+    from baton.progress import silent
+
+    progress = progress or silent()
     options = options or Options(reason=ocr.check(["eng"]))
     out_dir = central / SOURCES_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -539,7 +542,9 @@ def run_ingest(central: Path, patterns: list[str], options: Options | None = Non
     documents, skipped = dict(previous), []
     written = unchanged = 0
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    for path, name in expand(central, patterns):
+    found = list(expand(central, patterns))
+    progress.step(f"reading {len(found)} documents (changed ones are converted; OCR when available)")
+    for path, name in progress.each(found, "documents", "documents", lambda: f"{written} written"):  # noqa: B023 - the live count
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         old = previous.get(name)
         if old and old.get("sha256") == digest and (central / old["file"]).is_file():

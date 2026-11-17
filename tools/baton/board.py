@@ -97,6 +97,8 @@ def _repos(central: Path) -> list:
 
 
 def _gate(story: state_check.Story, text: str) -> str:
+    if state_check.gate_off(story.central):
+        return "off"
     if not (story.central / "profile" / "branch-points.yaml").is_file():
         return "-"
     refused = state_check._context_gate(story, state_check.track_of(text))

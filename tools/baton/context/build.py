@@ -25,6 +25,7 @@ from baton.context.product import (
     vocabulary,
     write_points,
 )
+from baton.progress import Progress, silent
 
 _TEST_METHOD = re.compile(r"@Test\b[^;{]*?\bvoid\s+(\w+)\s*\(")
 _DISPLAY = re.compile(r"@DisplayName\(\s*\"((?:\\.|[^\"\\])*)\"\s*\)")
@@ -33,18 +34,21 @@ _CLARIFICATION = re.compile(r"^-\s*(\S+)\s+Q:\s*(.+?)\s+A:\s*(.+)$")
 _DRAFT_HEAD = re.compile(r"^### [RW]-draft-\d+", re.M)
 
 
-def extract(repos: list[Repo], vocab: bp.Vocabulary, use_treesitter: bool = True) -> list[bp.Point]:
+def extract(
+    repos: list[Repo], vocab: bp.Vocabulary, use_treesitter: bool = True, progress: Progress | None = None
+) -> list[bp.Point]:
+    progress = progress or silent()
     points: list[bp.Point] = []
     for repo in repos:
-        for name, module in sorted(repo.modules.items()):
-            for path in module.sources:
-                rel = path.relative_to(repo.path).as_posix()
-                found = bp.points_in(
-                    path.read_text(encoding="utf-8", errors="replace"), repo.name, rel, vocab, use_treesitter
-                )
-                for point in found:
-                    point.module = name
-                points += found
+        files = [(name, path) for name, module in sorted(repo.modules.items()) for path in module.sources]
+        for name, path in progress.each(files, repo.name, extra=lambda: f"{len(points)} branch points"):
+            rel = path.relative_to(repo.path).as_posix()
+            found = bp.points_in(
+                path.read_text(encoding="utf-8", errors="replace"), repo.name, rel, vocab, use_treesitter
+            )
+            for point in found:
+                point.module = name
+            points.extend(found)
     return sorted(points, key=lambda p: (p.repo, p.file, p.line, p.kind, p.predicate))
 
 
@@ -136,39 +140,42 @@ def _cited(domain: dm.Domain) -> str:
     return " ".join(r.source for r in domain.confirmed_rules())
 
 
-def mine_tests(repos: list[Repo], vocab: bp.Vocabulary, domain: dm.Domain) -> list[Draft]:
+def mine_tests(
+    repos: list[Repo], vocab: bp.Vocabulary, domain: dm.Domain, progress: Progress | None = None
+) -> list[Draft]:
+    progress = progress or silent()
     cited, drafts = _cited(domain), []
     for repo in repos:
-        for name, module in sorted(repo.modules.items()):
-            for path in module.tests:
-                text = path.read_text(encoding="utf-8", errors="replace")
-                if path.suffix == ".java":
-                    found = list(_TEST_METHOD.finditer(text))
-                    for index, match in enumerate(found):
-                        method = match.group(1)
-                        if re.search(rf"\b{re.escape(path.stem)}\.{re.escape(method)}\b", cited):
-                            continue
-                        end = found[index + 1].start() if index + 1 < len(found) else len(text)
-                        display = _DISPLAY.search(text[max(0, match.start() - 200) : match.start() + 200])
-                        fields = bp.fields_of(text[match.end() : end], vocab)
-                        if fields:
-                            drafts.append(
-                                Draft(
-                                    display.group(1) if display else _humanize(method),
-                                    fields,
-                                    f"test {path.stem}.{method}",
-                                    f"{repo.name}/{name}",
-                                    "test-name",
-                                )
+        tests = [(name, path) for name, module in sorted(repo.modules.items()) for path in module.tests]
+        for name, path in progress.each(tests, f"{repo.name} tests", extra=lambda: f"{len(drafts)} drafts"):
+            text = path.read_text(encoding="utf-8", errors="replace")
+            if path.suffix == ".java":
+                found = list(_TEST_METHOD.finditer(text))
+                for index, match in enumerate(found):
+                    method = match.group(1)
+                    if re.search(rf"\b{re.escape(path.stem)}\.{re.escape(method)}\b", cited):
+                        continue
+                    end = found[index + 1].start() if index + 1 < len(found) else len(text)
+                    display = _DISPLAY.search(text[max(0, match.start() - 200) : match.start() + 200])
+                    fields = bp.fields_of(text[match.end() : end], vocab)
+                    if fields:
+                        drafts.append(
+                            Draft(
+                                display.group(1) if display else _humanize(method),
+                                fields,
+                                f"test {path.stem}.{method}",
+                                f"{repo.name}/{name}",
+                                "test-name",
                             )
-                else:
-                    for match in _TS_TEST.finditer(text):
-                        fields = bp.fields_of(match.group(2), vocab, read_strings=True)
-                        label = f"test {path.name}: {match.group(2)}"
-                        if fields and match.group(2) not in cited:
-                            drafts.append(
-                                Draft(match.group(2), fields, label, f"{repo.name}/{name}", "test-name")
-                            )
+                        )
+            else:
+                for match in _TS_TEST.finditer(text):
+                    fields = bp.fields_of(match.group(2), vocab, read_strings=True)
+                    label = f"test {path.name}: {match.group(2)}"
+                    if fields and match.group(2) not in cited:
+                        drafts.append(
+                            Draft(match.group(2), fields, label, f"{repo.name}/{name}", "test-name")
+                        )
     return drafts
 
 
@@ -196,11 +203,19 @@ def mine_points(points: list[dict]) -> list[Draft]:
     return drafts
 
 
-def mine_clarifications(central: Path, vocab: bp.Vocabulary) -> list[Draft]:
+def mine_clarifications(
+    central: Path, vocab: bp.Vocabulary, progress: Progress | None = None
+) -> list[Draft]:
+    progress = progress or silent()
     drafts = []
-    for row in stories.collect(central):
+    # one scan of the story branches for all stories: find_story per story re-scanned them every time
+    on_branch = {s.story_id: s for s in state_check.branch_stories(central)}
+    for row in progress.each(stories.collect(central), "stories", "stories", lambda: f"{len(drafts)} drafts"):
+        story = on_branch.get(row["story"])
+        if row["where"] in ("here", "archive") or story is None:
+            story = state_check.Story(central, row["feature"], row["story"], central / row["path"])
         try:
-            text = state_check.find_story(central, row["story"]).text()
+            text = story.text()
         except (FileNotFoundError, OSError):
             continue
         for line in (state_check.section(text, "Clarifications") or "").splitlines():
@@ -221,10 +236,15 @@ def mine_clarifications(central: Path, vocab: bp.Vocabulary) -> list[Draft]:
     return drafts
 
 
-def mine_documents(central: Path, vocab: bp.Vocabulary, domain: dm.Domain) -> list[Draft]:
+def mine_documents(
+    central: Path, vocab: bp.Vocabulary, domain: dm.Domain, progress: Progress | None = None
+) -> list[Draft]:
     """Word and rule drafts from the ingested sources (baton context ingest), grouped per document."""
+    progress = progress or silent()
     drafts = []
-    for document in docs.sources(central):
+    for document in progress.each(
+        docs.sources(central), "documents", "documents", lambda: f"{len(drafts)} drafts"
+    ):
         group = f"document {document['source']}"
         mined = docs.mine_document(central, document, vocab, domain)
         for word, definition, cite in mined.words:
@@ -304,19 +324,30 @@ def render_drafts(drafts: list[Draft], kept: list[str]) -> str:
 
 
 def run_build(
-    central: Path, repos: list[Repo], domain: dm.Domain, settings: Settings, use_treesitter: bool = True
+    central: Path,
+    repos: list[Repo],
+    domain: dm.Domain,
+    settings: Settings,
+    use_treesitter: bool = True,
+    progress: Progress | None = None,
 ) -> dict:
+    progress = progress or silent()
     vocab = vocabulary(repos, [w.word for w in domain.words], settings)
-    points = extract(repos, vocab, use_treesitter)
+    progress.step("scanning the code for business decisions (branch points)")
+    points = extract(repos, vocab, use_treesitter, progress)
+    progress.step(f"matching {len(points)} branch points to the rules in profile/domain.md")
     merged = merge(points, load_points(central), domain, {r.name: r.commit for r in repos})
     generated = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     write_points(central, merged, generated)
+    progress.note("wrote profile/branch-points.yaml")
+    progress.step("drafting rules and words from tests, clarifications and documents")
     drafts = (
         mine_points(merged)
-        + mine_tests(repos, vocab, domain)
-        + mine_clarifications(central, vocab)
-        + mine_documents(central, vocab, domain)
+        + mine_tests(repos, vocab, domain, progress)
+        + mine_clarifications(central, vocab, progress)
+        + mine_documents(central, vocab, domain, progress)
     )
+    progress.step(f"writing {len(drafts)} drafts to {DRAFTS_FILE}")
     kept = kept_drafts(central)
     path = central / DRAFTS_FILE
     path.parent.mkdir(parents=True, exist_ok=True)

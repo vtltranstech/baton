@@ -202,6 +202,12 @@ class Build:
         return code, out.getvalue().strip()
 
     def gate0(self) -> Action | None:
+        off = state_check.gate_off(self.central)
+        if off:
+            self.log.append(f"gate 0: off for the product by the Tech Lead: {off}")
+            if self.last("gate0") is None:
+                self.record("gate0", by="TL", override=off, scope="product")
+            return None
         if not (self.central / "profile" / "branch-points.yaml").is_file():
             return None
         code, out = self.cli("context", "check", self.sid, "--track", self.track())

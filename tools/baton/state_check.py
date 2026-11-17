@@ -364,6 +364,26 @@ def gate_override(text: str) -> str | None:
     return f"{match.group(1)} (TL, {match.group(2)})" if match else None
 
 
+# The Tech Lead switches gate 0 off for the whole product, e.g. while the context map cannot be built:
+# a row `| gate0 | off: <reason> (TL, YYYY-MM-DD) |` in profile/project.md. Recorded like the story override,
+# shown as `off` on the board; the state-gate hook refuses an agent edit that adds, changes or removes it.
+GATE_OFF = re.compile(
+    r"^\|[ \t]*gate0[ \t]*\|[ \t]*off:[ \t]*(\S.*?)[ \t]*"
+    r"\((?:TL|Tech Lead),[ \t]*(\d{4}-\d{2}-\d{2})\)[ \t]*\|",
+    re.M | re.I,
+)
+
+
+def gate_off(central: Path) -> str | None:
+    """The recorded reason when the Tech Lead switched gate 0 off for the product, else None."""
+    try:
+        text = (Path(central) / "profile" / "project.md").read_text(encoding="utf-8")
+    except OSError:
+        return None
+    match = GATE_OFF.search(text)
+    return f"{match.group(1)} (TL, {match.group(2)})" if match else None
+
+
 def context_gate(story: Story, track: str | None, text: str | None = None) -> str | None:
     refused = _context_gate(story, track)
     return None if refused and gate_override(text or "") else refused
@@ -374,7 +394,7 @@ def _context_gate(story: Story, track: str | None) -> str | None:
     Ready or Designed only with a context manifest, no blocking gap in it, and every area it changes still
     understood well enough for its track (an area goes stale when its code changes after the check)."""
     central = story.central
-    if not (central / "profile" / "branch-points.yaml").is_file():
+    if not (central / "profile" / "branch-points.yaml").is_file() or gate_off(central):
         return None
     manifest = story.design("context.json")
     text = story.read(manifest)

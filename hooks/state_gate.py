@@ -137,6 +137,15 @@ def check_file(tool: str, tool_input: dict, cwd: str) -> str | None:
         return "refused: the tool call names no file path, so the state gate cannot check it."
     joined = Path(os.path.normpath(os.path.join(cwd, paths[0])))
     real = Path(os.path.realpath(joined))
+    if real.name == "project.md" and real.parent.name == "profile":
+        current = real.read_text(encoding="utf-8") if real.is_file() else ""
+        proposed, fragment = _proposed(tool, tool_input, current)
+        after = proposed if proposed is not None else (fragment or "")
+        if state_check.GATE_OFF.findall(after) != state_check.GATE_OFF.findall(current) and (
+            proposed is not None or state_check.GATE_OFF.search(fragment or "")
+        ):
+            return "refused: only the Tech Lead switches gate 0 off (`| gate0 | off: ... |` in profile/project.md), in their own editor."  # noqa: E501
+        return None
     target = joined if is_story_path(str(joined)) else real if is_story_path(str(real)) else None
     if target is None:
         return None

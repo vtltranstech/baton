@@ -235,3 +235,28 @@ def test_a_commit_after_security_runs_security_again_and_refuses_approved(centra
     text = path.read_text() + "\n## Human findings\n- none\n"
     result = state_check.check(path, "Approved", story_text=text, central=central)
     assert not result.ok and "is stale: invoice-service" in result.missing
+
+
+def test_gate_0_off_for_the_product_is_recorded_once_and_shown(central, capsys):
+    (central / "profile" / "branch-points.yaml").write_text("points: []\n")
+    project = central / "profile" / "project.md"
+    project.write_text(
+        project.read_text().replace(
+            "| core.version |", "| gate0 | off: map not built yet (TL, 2026-11-17) |\n| core.version |"
+        )
+    )
+    code, act = build(central, capsys)
+    assert act["agent"] == "architect"
+    assert "gate 0: off for the product by the Tech Lead: map not built yet (TL, 2026-11-17)" in act["log"]
+    build(central, capsys)
+    gates = [
+        s
+        for s in json.loads((central / QA / "FIX-1-build.json").read_text())["steps"]
+        if s["step"] == "gate0"
+    ]
+    assert len(gates) == 1 and gates[0]["scope"] == "product" and gates[0]["by"] == "TL"
+    assert main(["context", "check", "FIX-1", "--central", str(central)]) == 0
+    assert "gate 0 is off for the product: map not built yet" in capsys.readouterr().out
+    assert main(["board", "--central", str(central), "--json"]) == 0
+    rows = json.loads(capsys.readouterr().out)["stories"]
+    assert {r["gate"] for r in rows} == {"off"}

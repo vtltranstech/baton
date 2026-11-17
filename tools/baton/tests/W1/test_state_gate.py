@@ -252,3 +252,15 @@ def test_an_agent_cannot_write_a_gate_0_override(run_hook, central):
     assert edit(run_hook, central, "## Rule ledger\nx\n", "## Rule ledger\ny\n").returncode == 0
     done = edit(run_hook, central, line, "")
     assert done.returncode == 2
+
+
+def test_an_agent_cannot_switch_gate_0_off_for_the_product(run_hook, central):
+    project = "profile/project.md"
+    base = "| Key | Value |\n| --- | --- |\n| project.name | x |\n"
+    (central / project).write_text(base)
+    row = "| gate0 | off: map not built yet (TL, 2026-11-17) |\n"
+    done = edit(run_hook, central, "| project.name | x |\n", "| project.name | x |\n" + row, path=project)
+    assert done.returncode == 2 and "only the Tech Lead switches gate 0 off" in done.stderr
+    assert edit(run_hook, central, "| x |", "| y |", path=project).returncode == 0
+    (central / project).write_text(base + row)
+    assert edit(run_hook, central, row, "", path=project).returncode == 2

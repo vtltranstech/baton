@@ -120,6 +120,12 @@ def _understanding(args: argparse.Namespace, central: Path, repos, domain, point
     return EXIT_OK
 
 
+def state_check_gate_off(central: Path) -> str | None:
+    from baton.state_check import gate_off
+
+    return gate_off(central)
+
+
 def run(args: argparse.Namespace) -> int:
     from baton.context import build, check, score, understanding
 
@@ -153,7 +159,11 @@ def run(args: argparse.Namespace) -> int:
                     file=sys.stderr,
                 )
                 return EXIT_REFUSED
-            summary = ingest.run_ingest(central, patterns, ingest.options_from(settings))
+            from baton.progress import Progress
+
+            summary = ingest.run_ingest(
+                central, patterns, ingest.options_from(settings), progress=Progress("context ingest", steps=1)
+            )
             lines = [
                 f"{summary['written']} written, {summary['unchanged']} unchanged, {len(summary['skipped'])} "
                 f"skipped; {summary['documents']} documents in {ingest.INDEX_JSON}."
@@ -190,9 +200,24 @@ def run(args: argparse.Namespace) -> int:
                 return EXIT_REFUSED
             print(f"Wrote the answer under {args.words[0]} in {where}. Grading again:")
             args.action = "understand"
-        repos = load_repos(central)
+        off = state_check_gate_off(central) if args.action == "check" and args.story else None
+        if off:
+            _out(
+                args,
+                {"story": args.story, "blocking": 0, "gateOff": off},
+                f"{args.story}: gate 0 is off for the product: {off}; nothing checked - accepted",
+            )
+            return EXIT_OK
         if args.action == "build":
-            summary = build.run_build(central, repos, domain, settings)
+            from baton.progress import Progress
+
+            progress = Progress("context build", steps=5)
+            progress.step("reading the repos in profile/project.md")
+            repos = load_repos(central, progress)
+            summary = build.run_build(central, repos, domain, settings, progress=progress)
+        else:
+            repos = load_repos(central)
+        if args.action == "build":
             ext = ", ".join(f"{k} {v}" for k, v in sorted(summary["extractors"].items())) or "none"
             _out(
                 args,

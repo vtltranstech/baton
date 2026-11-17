@@ -195,7 +195,10 @@ def _walk_ts(root: Path) -> list[Path]:
     ]
 
 
-def load_repos(central: Path) -> list[Repo]:
+def load_repos(central: Path, progress=None) -> list[Repo]:
+    from baton.progress import silent
+
+    progress = progress or silent()
     stack, owners = _stack_rows(central), _owners(central)
     repos = []
     for ref in read_repo_table(central):
@@ -220,6 +223,8 @@ def load_repos(central: Path) -> list[Repo]:
                     _add(repo, path, layout, kind == "test")
             for path in _walk_ts(ref.path):
                 _add(repo, path, layout, bool(_TS_TEST.search(path.name)))
+        files = sum(len(m.sources) + len(m.tests) for m in repo.modules.values())
+        progress.note(f"{ref.name}: {files} files in {len(repo.modules)} modules")
         for edge in repo.edges:
             rel = str((edge.get("provenance") or {}).get("file", ""))
             name = module_of(rel, layout)
