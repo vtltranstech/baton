@@ -267,3 +267,20 @@ def test_read_log_and_report(product, capsys):
     assert "files read by more than one agent: 1" in capsys.readouterr().out
     (central / ".baton/reads.jsonl").unlink()
     assert main(["reads", "--central", str(central)]) == 1
+
+
+def test_read_log_story_from_branch(product):
+    central = product / "central"
+    git = central / ".git"
+    if not git.is_dir():
+        git.mkdir()
+    (git / "HEAD").write_text("ref: refs/heads/story/F-002-S-010\n")
+    read = {"tool_name": "Read", "tool_input": {"file_path": str(central / "x.md")}, "agent_type": "qa"}
+    env = {"BATON_STORY": "", "POD_STORY": "", "HARNESS_STORY": ""}
+    assert _hook(central, read, env).returncode == 0
+    assert json.loads((central / ".baton/reads.jsonl").read_text().splitlines()[-1])["story"] == "S-010"
+    assert _hook(central, read, {**env, "BATON_STORY": "S-099"}).returncode == 0
+    assert json.loads((central / ".baton/reads.jsonl").read_text().splitlines()[-1])["story"] == "S-099"
+    (git / "HEAD").write_text("ref: refs/heads/main\n")
+    assert _hook(central, read, env).returncode == 0
+    assert json.loads((central / ".baton/reads.jsonl").read_text().splitlines()[-1])["story"] == ""

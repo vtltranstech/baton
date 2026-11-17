@@ -3,13 +3,15 @@
 
 Never blocks and never fails the call: any problem is swallowed. Records which agent read what and roughly
 how many tokens came back, never the content. A Bash call keeps only its first two words (`baton ir`,
-`mvn -q`) so arguments, which can hold secrets, stay out of the log.
+`mvn -q`) so arguments, which can hold secrets, stay out of the log. The story is BATON_STORY, else the
+one on the central repo's checked-out `story/<F>-<S>` branch.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -20,6 +22,23 @@ sys.path.insert(0, HERE)
 from _common import central_dir  # noqa: E402
 
 LOG = ".baton/reads.jsonl"
+_BRANCH = re.compile(r"^ref: refs/heads/story/.+-([A-Za-z]+-\d+)\s*$")
+
+
+def branch_story(central: Path) -> str:
+    """The story of the central repo's checked-out `story/<F>-<S>` branch, read from .git/HEAD (no git call)."""
+    git = central / ".git"
+    if git.is_file():  # a worktree: `gitdir: <path>`
+        line = git.read_text(encoding="utf-8", errors="replace").strip()
+        if not line.startswith("gitdir:"):
+            return ""
+        git = Path(line.removeprefix("gitdir:").strip())
+        git = git if git.is_absolute() else central / git
+    head = git / "HEAD"
+    if not head.is_file():
+        return ""
+    match = _BRANCH.match(head.read_text(encoding="utf-8", errors="replace"))
+    return match.group(1) if match else ""
 
 
 def record(payload: dict) -> dict | None:
@@ -34,8 +53,16 @@ def record(payload: dict) -> dict | None:
         "agent": payload.get("agent_type") or "main",
         "agent_id": payload.get("agent_id") or "",
         "tool": tool,
-        "story": os.environ.get("BATON_STORY") or os.environ.get("POD_STORY") or os.environ.get("HARNESS_STORY", ""),
+        "story": os.environ.get("BATON_STORY")
+        or os.environ.get("POD_STORY")
+        or os.environ.get("HARNESS_STORY")
+        or "",
     }
+    if not row["story"]:
+        try:
+            row["story"] = branch_story(central)
+        except OSError:
+            pass
     target = tool_input.get("file_path") or tool_input.get("path") or ""
     if isinstance(target, str) and target:
         path = Path(target) if os.path.isabs(target) else Path(payload.get("cwd") or central) / target

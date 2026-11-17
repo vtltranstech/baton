@@ -2,7 +2,7 @@
 
 baton reads                     the latest session in the log
 baton reads --session <id>      one session
-baton reads --story S-010       the calls of the agents whose prompt names S-010 (or tagged BATON_STORY)
+baton reads --story S-010       calls on branch story/<F>-S-010, tagged BATON_STORY, or by agents naming it
 baton reads --all               every session
 
 Tokens are the size of what each tool returned divided by four: an estimate for comparing runs, not
