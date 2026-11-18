@@ -161,9 +161,9 @@ def run(args: argparse.Namespace) -> int:
                 return EXIT_REFUSED
             from baton.progress import Progress
 
-            summary = ingest.run_ingest(
-                central, patterns, ingest.options_from(settings), progress=Progress("context ingest", steps=1)
-            )
+            progress = Progress("context ingest", steps=1)
+            summary = ingest.run_ingest(central, patterns, ingest.options_from(settings), progress=progress)
+            progress.done()
             lines = [
                 f"{summary['written']} written, {summary['unchanged']} unchanged, {len(summary['skipped'])} "
                 f"skipped; {summary['documents']} documents in {ingest.INDEX_JSON}."
@@ -215,6 +215,7 @@ def run(args: argparse.Namespace) -> int:
             progress.step("reading the repos in profile/project.md")
             repos = load_repos(central, progress)
             summary = build.run_build(central, repos, domain, settings, progress=progress)
+            progress.done()
         else:
             repos = load_repos(central)
         if args.action == "build":

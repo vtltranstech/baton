@@ -6,6 +6,7 @@ it);it never stops the map from being drawn.
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -168,31 +169,34 @@ def module_of(rel: str, layout: Layout) -> str | None:
     return None
 
 
-def _walk_java(root: Path, kind: str, modules: list[str]) -> list[Path]:
+def _walk_java(root: Path, kind: str, modules: list[str], seen=None) -> list[Path]:
+    """The .java files of `kind` (main or test) in every module; `seen(path)` is called as each is found."""
     found: list[Path] = []
     for module in [".", *modules]:
         base = root / module / "src" / kind / "java"
         if base.is_dir():
-            found += [
-                p
-                for p in sorted(base.rglob("*.java"))
-                if p.name not in ("package-info.java", "module-info.java")
-            ]
-    return found
+            for p in base.rglob("*.java"):
+                if p.name not in ("package-info.java", "module-info.java"):
+                    found.append(p)
+                    if seen:
+                        seen(p)
+    return sorted(found)
 
 
-def _walk_ts(root: Path) -> list[Path]:
+def _walk_ts(root: Path, seen=None) -> list[Path]:
     base = root / "src"
     if not base.is_dir():
         return []
-    return [
-        p
-        for p in sorted(base.rglob("*"))
-        if p.suffix in _TS
-        and p.is_file()
-        and not _NEVER.intersection(p.relative_to(root).parts)
-        and not p.name.endswith(".d.ts")
-    ]
+    found: list[Path] = []
+    for current, dirs, files in os.walk(base):
+        dirs[:] = [d for d in dirs if d not in _NEVER and not d.startswith(".")]  # pruned: never opened
+        for name in files:
+            if name.endswith(_TS) and not name.endswith(".d.ts"):
+                p = Path(current) / name
+                found.append(p)
+                if seen:
+                    seen(p)
+    return sorted(found)
 
 
 def load_repos(central: Path, progress=None) -> list[Repo]:
@@ -201,8 +205,10 @@ def load_repos(central: Path, progress=None) -> list[Repo]:
     progress = progress or silent()
     stack, owners = _stack_rows(central), _owners(central)
     repos = []
-    for ref in read_repo_table(central):
-        progress.note(f"{ref.name}: listing files under {ref.path}")
+    table = read_repo_table(central)
+    for index, ref in enumerate(table, 1):
+        label = f"{ref.name} (repo {index} of {len(table)})"
+        progress.note(f"{label}: reading {ref.path}")
         repo = Repo(ref.name, ref.path, stack=stack.get(ref.name, {}))
         repo.owner = owners.get(ref.name) or ("CODEOWNERS" if _codeowners(ref.path) else "")
         try:
@@ -217,15 +223,23 @@ def load_repos(central: Path, progress=None) -> list[Repo]:
             layout = read_layout(central, ref.name)
         except MissingInput:
             layout = Layout(UNKNOWN, {})
+        found = [0]
+
+        def seen(path: Path, where: str = "", label: str = label, found: list = found) -> None:
+            found[0] += 1
+            progress.tick(f"{label}: {where} files", found[0], "found so far")
+
         if ref.path.is_dir():
             build = declared_modules(ref.path)
             for kind in ("main", "test"):
-                for path in _walk_java(ref.path, kind, build):
+                for path in _walk_java(ref.path, kind, build, lambda p, k=kind: seen(p, where=f"Java {k}")):
                     _add(repo, path, layout, kind == "test")
-            for path in _walk_ts(ref.path):
+            for path in _walk_ts(ref.path, lambda p: seen(p, where="TypeScript")):
                 _add(repo, path, layout, bool(_TS_TEST.search(path.name)))
         files = sum(len(m.sources) + len(m.tests) for m in repo.modules.values())
-        progress.note(f"{ref.name}: {files} files in {len(repo.modules)} modules")
+        progress.note(
+            f"{label}: read complete, {files} files in {len(repo.modules)} modules ({progress.elapsed()})"
+        )
         for edge in repo.edges:
             rel = str((edge.get("provenance") or {}).get("file", ""))
             name = module_of(rel, layout)

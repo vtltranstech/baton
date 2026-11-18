@@ -25,6 +25,7 @@ class Progress:
         self.tty = bool(getattr(self.stream, "isatty", lambda: False)())
         self.start = time.monotonic()
         self._inplace = False
+        self._last_tick = 0.0
 
     def elapsed(self) -> str:
         seconds = int(time.monotonic() - self.start)
@@ -69,6 +70,19 @@ class Progress:
                 self._emit(line, inplace=index != total)
         if not total:
             self._emit(f"  {label}: no {unit}")
+
+
+    def done(self) -> None:
+        """The closing line, so a finished run says so: `context build complete (0:42)`."""
+        self._emit(f"{self.name} complete ({self.elapsed()})")
+
+    def tick(self, label: str, count: int, unit: str = "files", final: bool = False) -> None:
+        """A running count with no known total (`label: 45 files`): in place on a terminal, else a line at
+        most every `every` seconds; `final` always prints and ends the line."""
+        now = time.monotonic()
+        if final or now - self._last_tick >= (0.2 if self.tty else self.every):
+            self._last_tick = now
+            self._emit(f"  {label}: {count} {unit} ({self.elapsed()})", inplace=not final)
 
 
 def silent() -> Progress:
