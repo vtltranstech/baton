@@ -26,7 +26,8 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--feature", help="only this feature id")
 
 
-def collect(central: Path, feature: str | None = None) -> list[dict]:
+def collect(central: Path, feature: str | None = None, on_branch: list | None = None) -> list[dict]:
+    """Every story here, archived, or only on its story branch (`on_branch`: branch_stories, if read)."""
     central = Path(central)
     stories: list[state_check.Story] = []
     for path in sorted((central / "docs" / "stories").glob("*/*.md")):
@@ -37,7 +38,9 @@ def collect(central: Path, feature: str | None = None) -> list[dict]:
         if match:
             stories.append(state_check.Story(central, path.parts[-3], match.group(1), path))
     seen = {story.story_id for story in stories}
-    stories += [story for story in state_check.branch_stories(central) if story.story_id not in seen]
+    if on_branch is None:
+        on_branch = state_check.branch_stories(central)
+    stories += [story for story in on_branch if story.story_id not in seen]
     rows = []
     for story in stories:
         if feature and story.feature != feature:

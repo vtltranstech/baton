@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -52,28 +53,58 @@ def default_base(repo: Path) -> str | None:
     return None
 
 
-def _count(repo: Path, spec: str) -> int:
-    value = _out(repo, "rev-list", "--count", spec)
-    return int(value) if value and value.isdigit() else 0
+def _counts(repo: Path, left: str, right: str) -> tuple[int, int]:
+    """(commits only in `left`, commits only in `right`), from one `rev-list --left-right` call."""
+    value = (_out(repo, "rev-list", "--left-right", "--count", f"{left}...{right}") or "").split()
+    return (int(value[0]), int(value[1])) if len(value) == 2 and all(v.isdigit() for v in value) else (0, 0)
 
 
-def branch_state(repo: Path, branch: str, base: str | None, story_id: str) -> dict:
+class Repo:
+    """One repo's refs and its merged story ids, each read with a single git call (not one per story)."""
+
+    def __init__(self, path: Path, base: str | None = None):
+        self.path, self.base = path, base
+        fields = "%(refname)%09%(objectname:short)%09%(committerdate:iso-strict)%09%(subject)"
+        listing = _out(path, "for-each-ref", f"--format={fields}")
+        self.refs: dict[str, dict] = {}
+        for line in (listing or "").splitlines():
+            ref, sha, when, subject = (line.split("\t", 3) + ["", "", ""])[:4]
+            self.refs[ref] = {"commit": sha, "at": when, "subject": subject}
+        self._landed: set[str] | None = None
+
+    def has(self, ref: str) -> bool:
+        return ref in self.refs
+
+    def landed(self, story_id: str) -> bool:
+        """The base holds a commit whose message has a line starting `<story-id>:`."""
+        if self._landed is None:
+            log = None
+            if self.base:
+                log = _out(self.path, "log", "--format=%B", "-E", "--grep=^[A-Za-z]+-[0-9]+:", self.base)
+            self._landed = set(_LANDED.findall(log or ""))
+        return story_id in self._landed
+
+
+_LANDED = re.compile(r"^([A-Za-z]+-\d+):", re.M)
+
+
+def branch_state(repo: Path | Repo, branch: str, base: str | None, story_id: str) -> dict:
     """One branch in one repo: here and on origin or not, what is unpushed, and whether it merged."""
-    local, remote = _has(repo, f"refs/heads/{branch}"), _has(repo, f"refs/remotes/origin/{branch}")
+    refs = repo if isinstance(repo, Repo) else Repo(repo, base)
+    repo = refs.path
+    local, remote = refs.has(f"refs/heads/{branch}"), refs.has(f"refs/remotes/origin/{branch}")
     row: dict = {"branch": branch, "local": local, "remote": remote}
     if not local and not remote:
         row["status"] = "none"
         return row
     tip = branch if local else f"origin/{branch}"
-    row["ahead"] = _count(repo, f"{base}..{tip}") if base else None
-    row["behind"] = _count(repo, f"{tip}..{base}") if base else None
-    row["unpushed"] = _count(repo, f"origin/{branch}..{branch}") if local and remote else None
-    row["unpulled"] = _count(repo, f"{branch}..origin/{branch}") if local and remote else 0
-    last = _out(repo, "log", "-1", "--format=%h%x09%cI%x09%s", tip)
-    if last:
-        sha, when, subject = (last.split("\t", 2) + ["", ""])[:3]
-        row["last"] = {"commit": sha, "at": when, "subject": subject}
-    landed = base and _out(repo, "log", "-1", "--format=%h", "-E", f"--grep=^{story_id}:", base)
+    row["behind"], row["ahead"] = _counts(repo, base, tip) if base else (None, None)
+    both = local and remote
+    row["unpushed"], row["unpulled"] = _counts(repo, branch, f"origin/{branch}") if both else (None, 0)
+    last = refs.refs.get(f"refs/heads/{branch}" if local else f"refs/remotes/origin/{branch}")
+    if last and last["commit"]:
+        row["last"] = dict(last)
+    landed = bool(base) and refs.landed(story_id)
     if row["ahead"] == 0 and landed:
         row["status"] = "merged"
     elif row["ahead"] == 0:
@@ -146,21 +177,23 @@ def collect(central: Path, feature: str | None = None, story_id: str | None = No
         for repo in [central] + [r.path for r in repos]:
             _git(repo, "fetch", "--quiet", "--prune", "origin")
     base = default_base(central)
-    bases = {r.name: default_base(r.path) for r in repos}
-    found = {s.story_id: s for s in _stories(central)}
+    here = Repo(central, base)
+    code = [(r.name, Repo(r.path, default_base(r.path))) for r in repos]
+    on_branch = state_check.branch_stories(central)
+    found = {s.story_id: s for s in _stories(central, on_branch)}
     rows = []
-    for item in stories.collect(central, feature):
+    for item in stories.collect(central, feature, on_branch):
         if story_id and item["story"] != story_id:
             continue
         story = found.get(item["story"])
         text = story.text() if story else ""
         branch = f"{item['feature']}-{item['story']}"
         row = {**item, "gate": _gate(story, text) if story else "-",
-               "tagged": _has(central, f"refs/tags/{item['story']}"),
-               "central": branch_state(central, f"story/{branch}", base, item["story"])}
+               "tagged": here.has(f"refs/tags/{item['story']}"),
+               "central": branch_state(here, f"story/{branch}", base, item["story"])}
         row["code"] = [
-            {"name": r.name, **branch_state(r.path, f"feature/{branch}", bases[r.name], item["story"])}
-            for r in repos
+            {"name": name, **branch_state(refs, f"feature/{branch}", refs.base, item["story"])}
+            for name, refs in code
         ]
         row["code"] = [c for c in row["code"] if c["status"] != "none"]
         row["next"] = _next(row)
@@ -168,13 +201,15 @@ def collect(central: Path, feature: str | None = None, story_id: str | None = No
     return {"base": base, "repos": [r.name for r in repos], "stories": rows}
 
 
-def _stories(central: Path) -> list[state_check.Story]:
+def _stories(central: Path, on_branch: list[state_check.Story] | None = None) -> list[state_check.Story]:
     found = []
     for path in sorted((central / "docs" / "stories").glob("*/*.md")):
         if state_check._ID.match(path.stem):
             found.append(state_check.story_from_path(path, central))
     seen = {s.story_id for s in found}
-    return found + [s for s in state_check.branch_stories(central) if s.story_id not in seen]
+    if on_branch is None:
+        on_branch = state_check.branch_stories(central)
+    return found + [s for s in on_branch if s.story_id not in seen]
 
 
 def _ago(when: str | None) -> str:

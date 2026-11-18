@@ -202,6 +202,7 @@ def load_repos(central: Path, progress=None) -> list[Repo]:
     stack, owners = _stack_rows(central), _owners(central)
     repos = []
     for ref in read_repo_table(central):
+        progress.note(f"{ref.name}: listing files under {ref.path}")
         repo = Repo(ref.name, ref.path, stack=stack.get(ref.name, {}))
         repo.owner = owners.get(ref.name) or ("CODEOWNERS" if _codeowners(ref.path) else "")
         try:

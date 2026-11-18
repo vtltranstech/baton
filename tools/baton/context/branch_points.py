@@ -312,8 +312,12 @@ def points_in(
     return sorted(points, key=lambda p: (p.line, p.kind, p.predicate))
 
 
+# One declaration per line, spaces and tabs only: `\s` here would let the type run across lines, and a masked
+# comment block (all spaces) then backtracks exponentially.
 _DOCUMENT_FIELD = re.compile(
-    r"^\s*(?:private|protected|public)?\s*(?:final\s+)?[\w.<>?,\s\[\]]+?\s+([a-z][\w$]*)\s*(?:=[^;]*)?;", re.M
+    r"^[ \t]*(?:(?:private|protected|public|static|final|transient|volatile)[ \t]+)*"
+    r"[\w.$]+(?:[ \t]*<[^;=\n(){}]*>)?(?:[ \t]*\[[ \t]*\])*[ \t]+([a-z][\w$]*)[ \t]*(?:=[^;]*)?;",
+    re.M,
 )
 _RECORD = re.compile(r"\brecord\s+\w+\s*\(([^)]*)\)")
 
